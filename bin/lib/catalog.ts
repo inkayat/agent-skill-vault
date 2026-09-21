@@ -139,6 +139,9 @@ export function validateCatalog(catalog: Catalog): string[] {
     if (!(e.status in STATUSES)) errors.push(`entry ${e.id}: bad status ${e.status}`);
     if (!(e.activation in ACTIVATIONS)) errors.push(`entry ${e.id}: bad activation ${e.activation}`);
     if (!(e.scope in SCOPES)) errors.push(`entry ${e.id}: bad scope ${e.scope}`);
+    if (typeof e.notes !== "string") {
+      errors.push(`entry ${e.id}: notes must be a string (use empty string for none), got ${typeof e.notes}`);
+    }
 
     // The load-bearing invariant: only firstmate_candidate rows may auto-load or be
     // named explicitly; every other status is never eligible for a worker brief pick.

@@ -118,6 +118,22 @@ describe("validateCatalog: enumeration and invariants", () => {
   });
 });
 
+describe("validateCatalog: notes field", () => {
+  test("rejects an entry whose notes is not a string", () => {
+    const invalidNotesValues: unknown[] = [123, null, undefined, true, ["a"], { a: 1 }];
+    for (const notes of invalidNotesValues) {
+      const bad = baseCatalog([baseEntry({ notes: notes as unknown as string })]);
+      const errors = validateCatalog(bad);
+      expect(errors.some((e) => e.includes("notes must be a string") && e.includes("use empty string for none"))).toBe(true);
+    }
+  });
+
+  test("accepts an entry with empty string notes", () => {
+    const ok = baseCatalog([candidateEntry({ notes: "" })]);
+    expect(validateCatalog(ok)).toEqual([]);
+  });
+});
+
 describe("validateCatalog: content-model invariants (vault_path / content_sha256)", () => {
   test("rejects a firstmate_candidate with no vault_path", () => {
     const bad = baseCatalog([candidateEntry({ vault_path: null })]);
