@@ -1,0 +1,77 @@
+addy:api-and-interface-design	installed	never	worker		architecture	~/.agents/skills/api-and-interface-design	false
+addy:browser-testing-with-devtools	reference-only	never	worker		ui	skills/upstream/addyosmani-agent-skills/skills/browser-testing-with-devtools/SKILL.md	false
+addy:ci-cd-and-automation	firstmate_candidate	explicit	worker	IMPLEMENT	implement	skills/upstream/addyosmani-agent-skills/skills/ci-cd-and-automation/SKILL.md	false
+addy:code-review-and-quality	firstmate_candidate	explicit	worker	REVIEW	review	skills/upstream/addyosmani-agent-skills/skills/code-review-and-quality/SKILL.md	false
+addy:code-simplification	firstmate_candidate	explicit	worker	IMPLEMENT	simplification	skills/upstream/addyosmani-agent-skills/skills/code-simplification/SKILL.md	false
+addy:constraint-driven-development	firstmate_candidate	explicit	worker	IMPLEMENT	implement	skills/upstream/addyosmani-agent-skills/skills/constraint-driven-development/SKILL.md	false
+addy:context-engineering	installed	never	worker		meta	~/.agents/skills/context-engineering	false
+addy:debugging-and-error-recovery	firstmate_candidate	explicit	worker	DEEP	debugging	skills/upstream/addyosmani-agent-skills/skills/debugging-and-error-recovery/SKILL.md	false
+addy:deprecation-and-migration	firstmate_candidate	auto-candidate	worker	IMPLEMENT,IMPLEMENT-LARGE	implement	skills/upstream/addyosmani-agent-skills/skills/deprecation-and-migration/SKILL.md	true
+addy:documentation-and-adrs	firstmate_candidate	auto-candidate	worker	IMPLEMENT,ARCHITECTURE	docs	skills/upstream/addyosmani-agent-skills/skills/documentation-and-adrs/SKILL.md	true
+addy:doubt-driven-development	firstmate_candidate	explicit	worker	IMPLEMENT	verification	skills/upstream/addyosmani-agent-skills/skills/doubt-driven-development/SKILL.md	false
+addy:frontend-ui-engineering	firstmate_candidate	auto-candidate	worker	UI/BROWSER	ui	skills/upstream/addyosmani-agent-skills/skills/frontend-ui-engineering/SKILL.md	true
+addy:idea-refine	reference-only	never	captain		planning	skills/upstream/addyosmani-agent-skills/skills/idea-refine/SKILL.md	false
+addy:incremental-implementation	installed	never	worker		implement	~/.agents/skills/incremental-implementation	false
+addy:interview-me	reference-only	never	captain		planning	skills/upstream/addyosmani-agent-skills/skills/interview-me/SKILL.md	false
+addy:observability-and-instrumentation	firstmate_candidate	auto-candidate	worker	IMPLEMENT	implement	skills/upstream/addyosmani-agent-skills/skills/observability-and-instrumentation/SKILL.md	true
+addy:performance-optimization	firstmate_candidate	auto-candidate	worker	DEEP,IMPLEMENT	performance	skills/upstream/addyosmani-agent-skills/skills/performance-optimization/SKILL.md	true
+addy:planning-and-task-breakdown	installed	never	worker		planning	~/.agents/skills/planning-and-task-breakdown	false
+addy:security-and-hardening	installed	never	worker		security	~/.agents/skills/security-and-hardening	false
+addy:source-driven-development	firstmate_candidate	explicit	worker	IMPLEMENT	implement	skills/upstream/addyosmani-agent-skills/skills/source-driven-development/SKILL.md	false
+addy:spec-driven-development	firstmate_candidate	explicit	worker	IMPLEMENT	planning	skills/upstream/addyosmani-agent-skills/skills/spec-driven-development/SKILL.md	false
+brooks:brooks-audit	reference-only	never	worker		architecture	skills/upstream/hyhmrright-brooks-lint/skills/brooks-audit/SKILL.md	false
+brooks:brooks-debt	reference-only	never	worker		implement	skills/upstream/hyhmrright-brooks-lint/skills/brooks-debt/SKILL.md	false
+brooks:brooks-health	reference-only	never	worker		review	skills/upstream/hyhmrright-brooks-lint/skills/brooks-health/SKILL.md	false
+brooks:brooks-review	reference-only	never	worker		review	skills/upstream/hyhmrright-brooks-lint/skills/brooks-review/SKILL.md	false
+brooks:brooks-test	reference-only	never	worker		tdd	skills/upstream/hyhmrright-brooks-lint/skills/brooks-test/SKILL.md	false
+discovery:frontend-design	firstmate_candidate	auto-candidate	worker	UI/BROWSER	ui	skills/upstream/anthropics-skills/skills/frontend-design/SKILL.md	true
+discovery:supabase-postgres-best-practices	firstmate_candidate	explicit	worker	IMPLEMENT	implement	skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/SKILL.md	false
+discovery:webapp-testing	reference-only	never	worker		ui	skills/upstream/anthropics-skills/skills/webapp-testing/SKILL.md	false
+mattpocock:code-review	firstmate_candidate	explicit	worker	REVIEW	review	skills/adapted/mattpocock/code-review/SKILL.md	false
+mattpocock:codebase-design	firstmate_candidate	auto-candidate	worker	ARCHITECTURE,REVIEW	architecture	skills/upstream/mattpocock-skills/skills/engineering/codebase-design/SKILL.md	true
+mattpocock:diagnosing-bugs	firstmate_candidate	explicit	worker	DEEP	debugging	skills/upstream/mattpocock-skills/skills/engineering/diagnosing-bugs/SKILL.md	false
+mattpocock:domain-modeling	reference-only	never	captain		architecture	skills/upstream/mattpocock-skills/skills/engineering/domain-modeling/SKILL.md	false
+mattpocock:grill-me	reference-only	never	captain		planning	skills/upstream/mattpocock-skills/skills/productivity/grill-me/SKILL.md	false
+mattpocock:grill-with-docs	reference-only	never	captain		planning	skills/upstream/mattpocock-skills/skills/engineering/grill-with-docs/SKILL.md	false
+mattpocock:grilling	reference-only	never	captain		planning	skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md	false
+mattpocock:handoff	firstmate_candidate	explicit	worker+captain		meta	skills/upstream/mattpocock-skills/skills/productivity/handoff/SKILL.md	false
+mattpocock:improve-codebase-architecture	reference-only	never	captain		architecture	skills/upstream/mattpocock-skills/skills/engineering/improve-codebase-architecture/SKILL.md	false
+mattpocock:prototype	firstmate_candidate	explicit	worker	IMPLEMENT,UI/BROWSER	implement	skills/upstream/mattpocock-skills/skills/engineering/prototype/SKILL.md	false
+mattpocock:research	reference-only	never	worker		research	skills/upstream/mattpocock-skills/skills/engineering/research/SKILL.md	false
+mattpocock:resolving-merge-conflicts	firstmate_candidate	auto-candidate	worker	IMPLEMENT,IMPLEMENT-LARGE	git	skills/upstream/mattpocock-skills/skills/engineering/resolving-merge-conflicts/SKILL.md	true
+mattpocock:writing-for-agents	firstmate_candidate	auto-candidate	worker	IMPLEMENT	docs	skills/upstream/mattpocock-skills/skills/productivity/writing-for-agents/SKILL.md	true
+pstack:architect	reference-only	never	captain		architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/architect/SKILL.md	false
+pstack:blast-radius	firstmate_candidate	auto-candidate	worker	REVIEW,DEEP	review	skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md	true
+pstack:create-verification-skill	firstmate_candidate	explicit	worker	IMPLEMENT	meta	skills/upstream/cursor-plugins-pstack/pstack/skills/create-verification-skill/SKILL.md	false
+pstack:figure-it-out	firstmate_candidate	explicit	worker	DEEP,IMPLEMENT-LARGE	meta	skills/upstream/cursor-plugins-pstack/pstack/skills/figure-it-out/SKILL.md	false
+pstack:how	firstmate_candidate	explicit	worker	EXPLORE,RESEARCH	explore	skills/upstream/cursor-plugins-pstack/pstack/skills/how/SKILL.md	false
+pstack:maintain-verification-skill	firstmate_candidate	explicit	worker	IMPLEMENT	meta	skills/upstream/cursor-plugins-pstack/pstack/skills/maintain-verification-skill/SKILL.md	false
+pstack:principle-attack-the-premise	firstmate_candidate	auto-candidate	worker	DEEP	debugging	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-attack-the-premise/SKILL.md	true
+pstack:principle-boundary-discipline	firstmate_candidate	auto-candidate	worker	ARCHITECTURE,IMPLEMENT	architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-boundary-discipline/SKILL.md	true
+pstack:principle-encode-lessons-in-structure	firstmate_candidate	auto-candidate	worker	REVIEW,IMPLEMENT	meta	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-encode-lessons-in-structure/SKILL.md	true
+pstack:principle-fix-root-causes	firstmate_candidate	explicit	worker	DEEP	debugging	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-fix-root-causes/SKILL.md	false
+pstack:principle-foundational-thinking	firstmate_candidate	auto-candidate	worker	ARCHITECTURE,IMPLEMENT-LARGE	architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-foundational-thinking/SKILL.md	true
+pstack:principle-guard-the-context-window	firstmate_candidate	auto-candidate	worker	DEEP,IMPLEMENT-LARGE	delegation	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-guard-the-context-window/SKILL.md	true
+pstack:principle-make-operations-idempotent	firstmate_candidate	auto-candidate	worker	IMPLEMENT	implement	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-make-operations-idempotent/SKILL.md	true
+pstack:principle-minimize-reader-load	firstmate_candidate	explicit	worker	IMPLEMENT	simplification	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-minimize-reader-load/SKILL.md	false
+pstack:principle-model-the-domain	firstmate_candidate	auto-candidate	worker	ARCHITECTURE	architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-model-the-domain/SKILL.md	true
+pstack:principle-prove-it-works	firstmate_candidate	explicit	worker		verification	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-prove-it-works/SKILL.md	false
+pstack:principle-subtract-before-you-add	firstmate_candidate	explicit	worker	IMPLEMENT	simplification	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-subtract-before-you-add/SKILL.md	false
+pstack:principle-test-behavior-not-implementation	firstmate_candidate	auto-candidate	worker	IMPLEMENT,REVIEW	tdd	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-test-behavior-not-implementation/SKILL.md	true
+pstack:principle-type-system-discipline	firstmate_candidate	auto-candidate	worker	IMPLEMENT,ARCHITECTURE,REVIEW	architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/principle-type-system-discipline/SKILL.md	true
+pstack:show-me-your-work	reference-only	never	worker		verification	skills/upstream/cursor-plugins-pstack/pstack/skills/show-me-your-work/SKILL.md	false
+pstack:tdd	firstmate_candidate	explicit	worker	QUICK,IMPLEMENT	tdd	skills/upstream/cursor-plugins-pstack/pstack/skills/tdd/SKILL.md	false
+pstack:technical-writing	firstmate_candidate	explicit	worker	IMPLEMENT	docs	skills/upstream/cursor-plugins-pstack/pstack/skills/technical-writing/SKILL.md	false
+pstack:typescript-best-practices	firstmate_candidate	auto-candidate	worker	IMPLEMENT,REVIEW	architecture	skills/upstream/cursor-plugins-pstack/pstack/skills/typescript-best-practices/SKILL.md	true
+pstack:unslop	firstmate_candidate	auto-candidate	worker	RESEARCH,REVIEW,ARCHITECTURE,TENTH-MAN	docs	skills/upstream/cursor-plugins-pstack/pstack/skills/unslop/SKILL.md	true
+pstack:why	reference-only	never	captain		debugging	skills/upstream/cursor-plugins-pstack/pstack/skills/why/SKILL.md	false
+superpowers:brainstorming	reference-only	never	captain		planning	skills/upstream/obra-superpowers/skills/brainstorming/SKILL.md	false
+superpowers:receiving-code-review	firstmate_candidate	auto-candidate	worker	IMPLEMENT,IMPLEMENT-LARGE,UI/BROWSER,DEEP	review	skills/upstream/obra-superpowers/skills/receiving-code-review/SKILL.md	true
+superpowers:requesting-code-review	reference-only	never	worker		review	skills/upstream/obra-superpowers/skills/requesting-code-review/SKILL.md	false
+superpowers:systematic-debugging	installed	never	worker		debugging	~/.agents/skills/systematic-debugging	false
+superpowers:test-driven-development	installed	never	worker		tdd	~/.agents/skills/test-driven-development	false
+superpowers:verification-before-completion	installed	never	worker		verification	~/.agents/skills/verification-before-completion	false
+superpowers:writing-plans	reference-only	never	captain		planning	skills/upstream/obra-superpowers/skills/writing-plans/SKILL.md	false
+superpowers:writing-skills	firstmate_candidate	explicit	worker	IMPLEMENT	meta	skills/upstream/obra-superpowers/skills/writing-skills/SKILL.md	false
+thermos:thermo-nuclear-code-quality-review	firstmate_candidate	explicit	worker	REVIEW	review	skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-code-quality-review/SKILL.md	false
+thermos:thermo-nuclear-review	firstmate_candidate	auto-candidate	worker	REVIEW	review	skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-review/SKILL.md	true
