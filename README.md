@@ -146,7 +146,7 @@ then run `bun bin/render.ts`.
 
 ```console
 $ bun bin/lookup.ts --id pstack:blast-radius
-pstack:blast-radius	firstmate_candidate	auto-candidate	worker	REVIEW,DEEP	review	skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md	true
+pstack:blast-radius	firstmate_candidate	auto-candidate	worker	REVIEW,DEEP	review	skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md	true	Prove the one safety fact by running code. Note: skip the arena step.
 
 $ bun bin/lookup.ts --category REVIEW
 mattpocock:codebase-design	firstmate_candidate	auto-candidate	worker	ARCHITECTURE,REVIEW	architecture	skills/upstream/mattpocock-skills/skills/engineering/codebase-design/SKILL.md	true
@@ -159,10 +159,10 @@ pstack:unslop	firstmate_candidate	auto-candidate	worker	RESEARCH,REVIEW,ARCHITEC
 thermos:thermo-nuclear-review	firstmate_candidate	auto-candidate	worker	REVIEW	review	skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-review/SKILL.md	true
 
 $ bun bin/lookup.ts --id mattpocock:grilling
-mattpocock:grilling	reference-only	never	captain		planning	skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md	false
+mattpocock:grilling	reference-only	never	captain		planning	skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md	false	Added under delegated stronger-alternative research (not a direct captain approval): the real target of the grill-me/grill-with-docs router stubs, which otherwise point at two-line files with no content of their own. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection.
 
 $ bun bin/lookup.ts --id brooks:brooks-test
-brooks:brooks-test	reference-only	never	worker		tdd	skills/upstream/hyhmrright-brooks-lint/skills/brooks-test/SKILL.md	false
+brooks:brooks-test	reference-only	never	worker		tdd	skills/upstream/hyhmrright-brooks-lint/skills/brooks-test/SKILL.md	false	35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection.
 
 $ bun bin/lookup.ts --id books:a-philosophy-of-software-design
 no row for id books:a-philosophy-of-software-design (unknown id, or a catalog/team-only/restricted row -- those are never looked up)
@@ -181,10 +181,23 @@ own root, exactly as `firstmate-config` exports it. An `installed` row's
 cache path is `~/.agents/skills/<name>` instead, since it's already loaded
 globally by name.
 
+`--id` output carries a 9th, final column: the row's `notes` field
+(`bin/lib/catalog.ts`: `renderIdRow`), backslash-escaped by `escapeTsvField`
+so an embedded tab, newline, or backslash in the note can never introduce an
+extra column or row -- deterministic and always exactly one line. A row with
+no caveat still ends in a tab (empty final field), never an omitted column.
+`--category` output stays the unchanged 8-column shape (`renderRow`, no
+notes) so an ordinary category consultation never pays for a column it
+doesn't need.
+
 ### Handoff format (for whoever names a pick in a brief)
 
-Path + a one-line read-and-apply requirement + the row's `notes` (the
-adaptation/usage caveat, if any). Never paste the skill body into a brief.
+Path + a one-line read-and-apply requirement + the row's `notes` column
+(the adaptation/usage caveat, if any) verbatim from the `--id` output's 9th
+field -- never re-derive it by reading `catalog.yaml` by hand: `notes` is
+each entry's last YAML key, often more than ten lines below `- id:`, and a
+short grep window over the file misses it. Never paste the skill body into
+a brief.
 
 ## Provenance and license approach
 

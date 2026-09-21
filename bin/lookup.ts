@@ -8,18 +8,13 @@
 // final <=3-row, project-local-wins selection is a policy decision made outside
 // this repo, not something this lookup fakes by truncating real candidates.
 
-import { cachePath, isCandidate, lookupByCategory, lookupById, parseCatalog, type Catalog, type Entry } from "./lib/catalog.ts";
+import { lookupByCategory, lookupById, parseCatalog, renderIdRow, renderRow, type Catalog } from "./lib/catalog.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 
 function flag(args: string[], name: string): string | undefined {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : undefined;
-}
-
-function printRow(entry: Entry): void {
-  const row = [entry.id, entry.status, entry.activation, entry.scope, entry.categories.join(","), entry.cluster, cachePath(entry) ?? "", String(isCandidate(entry))];
-  console.log(row.join("\t"));
 }
 
 async function main() {
@@ -35,12 +30,12 @@ async function main() {
       console.error(`no row for id ${id} (unknown id, or a catalog/team-only/restricted row -- those are never looked up)`);
       process.exit(1);
     }
-    printRow(entry);
+    console.log(renderIdRow(entry));
     return;
   }
 
   if (category) {
-    for (const entry of lookupByCategory(catalog, category)) printRow(entry);
+    for (const entry of lookupByCategory(catalog, category)) console.log(renderRow(entry));
     return;
   }
 

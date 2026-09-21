@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { cachePath, lookupByCategory, lookupById, type Catalog, type Source } from "../bin/lib/catalog.ts";
+import { cachePath, escapeTsvField, lookupByCategory, lookupById, renderIdRow, renderRow, type Catalog, type Entry, type Source } from "../bin/lib/catalog.ts";
 import { loadCatalog } from "./helpers.ts";
 
 describe("explicit-id lookup", () => {
@@ -117,6 +117,92 @@ describe("category shortlist behavior", () => {
         expect(e.vault_path, e.id).toBeTruthy();
         expect(e.notes, e.id).toBeTruthy();
       }
+    }
+  });
+});
+
+describe("escapeTsvField", () => {
+  test("passes plain punctuation through unchanged", () => {
+    expect(escapeTsvField("skip the arena step; see note (v2)!")).toBe("skip the arena step; see note (v2)!");
+  });
+
+  test("backslash-escapes literal tabs so they can never introduce a column boundary", () => {
+    expect(escapeTsvField("a\tb")).toBe("a\\tb");
+  });
+
+  test("backslash-escapes literal newlines (LF and CRLF) so they can never introduce a row boundary", () => {
+    expect(escapeTsvField("a\nb")).toBe("a\\nb");
+    expect(escapeTsvField("a\r\nb")).toBe("a\\nb");
+  });
+
+  test("escapes a literal backslash first, so escaped sequences stay unambiguous", () => {
+    expect(escapeTsvField("a\\tb")).toBe("a\\\\tb");
+  });
+});
+
+describe("renderIdRow (--id notes column)", () => {
+  function noteEntry(overrides: Partial<Entry> = {}): Entry {
+    return {
+      id: "test:entry",
+      source: "test-source",
+      upstream_path: "skills/test/SKILL.md",
+      vault_path: "skills/upstream/test-source/skills/test/SKILL.md",
+      content_sha256: "b".repeat(64),
+      status: "firstmate_candidate",
+      activation: "explicit",
+      scope: "worker",
+      categories: ["IMPLEMENT"],
+      cluster: "implement",
+      favorite: false,
+      notes: "",
+      ...overrides,
+    };
+  }
+
+  test("pstack:blast-radius exposes the 'skip the arena step' caveat as the final field", async () => {
+    const catalog = await loadCatalog();
+    const entry = lookupById(catalog, "pstack:blast-radius")!;
+    const columns = renderIdRow(entry).split("\t");
+    expect(columns.length).toBe(9);
+    expect(columns[8]).toContain("skip the arena step");
+  });
+
+  test("pstack:how exposes the OMP-task/Pi-single-pass caveat as the final field", async () => {
+    const catalog = await loadCatalog();
+    const entry = lookupById(catalog, "pstack:how")!;
+    const columns = renderIdRow(entry).split("\t");
+    expect(columns.length).toBe(9);
+    expect(columns[8]).toContain("run explorers as OMP task helpers; single pass on Pi");
+  });
+
+  test("the first 8 columns are byte-identical to the base row (no shift, no duplication)", async () => {
+    const catalog = await loadCatalog();
+    const entry = lookupById(catalog, "pstack:blast-radius")!;
+    const idColumns = renderIdRow(entry).split("\t");
+    const baseColumns = renderRow(entry).split("\t");
+    expect(idColumns.slice(0, 8)).toEqual(baseColumns);
+  });
+
+  test("a row with punctuation, tabs, and newlines in notes stays exactly one TSV row", () => {
+    const entry = noteEntry({ notes: "quote \" comma, semicolon; tab\tnewline\nend" });
+    const rendered = renderIdRow(entry);
+    expect(rendered.split("\n").length).toBe(1);
+    expect(rendered.split("\t").length).toBe(9);
+  });
+
+  test("a row without notes emits an unambiguous empty final field", () => {
+    const entry = noteEntry({ notes: "" });
+    const columns = renderIdRow(entry).split("\t");
+    expect(columns.length).toBe(9);
+    expect(columns[8]).toBe("");
+  });
+});
+
+describe("renderRow (category shortlist shape, byte-compatible with the prior 8-column contract)", () => {
+  test("every real category row stays exactly 8 columns, no notes column leaks in", async () => {
+    const catalog = await loadCatalog();
+    for (const entry of lookupByCategory(catalog, "REVIEW")) {
+      expect(renderRow(entry).split("\t").length, entry.id).toBe(8);
     }
   });
 });
