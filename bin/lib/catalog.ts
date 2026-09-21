@@ -216,11 +216,34 @@ export function compactRows(catalog: Catalog): Entry[] {
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
+/** Deterministic base 8-column row shared by category shortlists and catalog.compact.tsv. */
+export function renderRow(entry: Entry): string {
+  return [entry.id, entry.status, entry.activation, entry.scope, entry.categories.join(","), entry.cluster, cachePath(entry) ?? "", String(isCandidate(entry))].join("\t");
+}
+
+/**
+ * Escapes a free-text field for embedding as a single TSV field: a literal
+ * backslash, tab, or newline (LF or CRLF) is backslash-escaped so the result
+ * can never introduce an extra column or row boundary. Deterministic and
+ * reversible; reuses the existing tab-joined row convention instead of a
+ * second format (JSON, CSV quoting, ...).
+ */
+export function escapeTsvField(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\t/g, "\\t").replace(/\r\n|\r|\n/g, "\\n");
+}
+
+/**
+ * Explicit-id row: the same 8 base columns plus the entry's `notes` --
+ * escaped via escapeTsvField -- as a 9th, final field. Only `--id` output
+ * carries this column; category shortlists stay the unchanged 8-column shape
+ * (renderRow) so ordinary consultation cost never grows.
+ */
+export function renderIdRow(entry: Entry): string {
+  return `${renderRow(entry)}\t${escapeTsvField(entry.notes)}`;
+}
+
 export function renderCompactTsv(catalog: Catalog): string {
-  const rows = compactRows(catalog).map((e) => {
-    const cp = cachePath(e) ?? "";
-    return [e.id, e.status, e.activation, e.scope, e.categories.join(","), e.cluster, cp, String(isCandidate(e))].join("\t");
-  });
+  const rows = compactRows(catalog).map((e) => renderRow(e));
   return rows.join("\n") + (rows.length > 0 ? "\n" : "");
 }
 
