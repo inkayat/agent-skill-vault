@@ -43,26 +43,41 @@ export interface Entry {
    * (rewritten, header-tagged). Non-null for firstmate_candidate (auto-candidate
    * or explicit pick) and reference-only (explicit-id/captain reference only,
    * never category/auto selection) entries; null for installed/catalog/
-   * team-only/restricted.
+   * team-only/restricted. Every non-null value must be a row in `vendored`,
+   * which is the sole authority for that file's bytes.
    */
   vault_path: string | null;
-  /** sha256 of the vendored local file at vault_path. Required whenever vault_path is set. */
-  content_sha256?: string;
   status: Status;
   activation: Activation;
   scope: Scope;
   categories: string[];
   cluster: string;
-  favorite: boolean;
   installed_as?: string;
-  size_bytes?: number;
   notes: string;
+}
+
+/**
+ * One maintained file under skills/. The authoritative vendored-file inventory:
+ * every skill body, prompt, reference, helper, script, and license byte the vault
+ * maintains, with the source (hence repo+commit) it came from and its expected hash.
+ * Nothing else records a hash or a pin: tests and pin bumps both read this list.
+ */
+export interface VendoredFile {
+  /** Repo-relative local path under skills/upstream/ or skills/adapted/. */
+  path: string;
+  /** Key in `sources`; supplies repo and commit. */
+  source: string;
+  /** Path in the source repo at that commit, or null for an adapted derivative. */
+  upstream_path: string | null;
+  /** sha256 of the local file's bytes. */
+  sha256: string;
 }
 
 export interface Catalog {
   version: number;
   sources: Record<string, Source>;
   entries: Entry[];
+  vendored: VendoredFile[];
 }
 
 const STATUSES: Record<string, true> = {
@@ -91,7 +106,6 @@ export const ALLOWED_LOOKUP_STATUSES: Record<string, true> = {
 
 const SHA_RE = /^[0-9a-f]{40}$/;
 const SHA256_RE = /^[0-9a-f]{64}$/;
-const MAX_AUTO_CANDIDATE_BYTES = 24 * 1024; // 24KB, per the five-check eligibility gate
 
 // Markers that disqualify a body from auto-candidate eligibility: lifecycle verbs,
 // orchestration primitives, and host-binding surfaces the captain's intent excludes.
@@ -130,6 +144,27 @@ export function validateCatalog(catalog: Catalog): string[] {
     if (!s.license_evidence) errors.push(`source ${sid}: missing license_evidence`);
   }
 
+  const vendoredPaths = new Set<string>();
+  if (!Array.isArray(catalog.vendored)) errors.push("vendored: missing authoritative vendored-file inventory");
+  for (const v of catalog.vendored ?? []) {
+    if (vendoredPaths.has(v.path)) errors.push(`vendored ${v.path}: duplicate inventory row`);
+    vendoredPaths.add(v.path);
+    if (!isContainedVaultPath(v.path)) {
+      errors.push(`vendored ${v.path}: path must stay under skills/upstream/ or skills/adapted/ with no traversal`);
+    }
+    if (!catalog.sources[v.source]) errors.push(`vendored ${v.path}: unknown source ${v.source}`);
+    if (!SHA256_RE.test(v.sha256)) errors.push(`vendored ${v.path}: sha256 is not 64 hex chars: ${v.sha256}`);
+    if (v.path.startsWith("skills/upstream/")) {
+      if (!v.upstream_path) {
+        errors.push(`vendored ${v.path}: an upstream snapshot requires upstream_path`);
+      } else if (v.path !== `skills/upstream/${v.source}/${v.upstream_path}`) {
+        errors.push(`vendored ${v.path}: path must equal skills/upstream/${v.source}/${v.upstream_path}`);
+      }
+    } else if (v.upstream_path !== null) {
+      errors.push(`vendored ${v.path}: an adapted derivative must set upstream_path: null (it is not byte-identical to one upstream file)`);
+    }
+  }
+
   const seenIds = new Set<string>();
   for (const e of catalog.entries) {
     if (seenIds.has(e.id)) errors.push(`entry ${e.id}: duplicate id`);
@@ -166,29 +201,21 @@ export function validateCatalog(catalog: Catalog): string[] {
     }
 
     // Content-model invariant: firstmate_candidate AND reference-only rows carry a
-    // real local body (the only two statuses ever surfaced by lookup with content).
+    // real local body (the only two statuses ever surfaced by lookup with content),
+    // and that body must be an inventory row -- `vendored` owns its hash and pin.
     // installed/catalog/team-only/restricted never carry a vault_path.
     if (e.status === "firstmate_candidate" || e.status === "reference-only") {
       if (!e.vault_path) {
         errors.push(`entry ${e.id}: status=${e.status} requires a real local vault_path`);
-      } else if (!e.vault_path.startsWith("skills/upstream/") && !e.vault_path.startsWith("skills/adapted/")) {
-        errors.push(`entry ${e.id}: vault_path must live under skills/upstream/ or skills/adapted/, got ${e.vault_path}`);
-      }
-      if (!e.content_sha256) {
-        errors.push(`entry ${e.id}: status=${e.status} requires content_sha256`);
-      } else if (!SHA256_RE.test(e.content_sha256)) {
-        errors.push(`entry ${e.id}: content_sha256 is not 64 hex chars: ${e.content_sha256}`);
+      } else if (!isContainedVaultPath(e.vault_path)) {
+        errors.push(`entry ${e.id}: vault_path must stay under skills/upstream/ or skills/adapted/ with no traversal, got ${e.vault_path}`);
+      } else if (!vendoredPaths.has(e.vault_path)) {
+        errors.push(`entry ${e.id}: vault_path ${e.vault_path} has no row in the vendored inventory`);
+      } else if (e.vault_path.startsWith("skills/upstream/") && e.vault_path !== `skills/upstream/${e.source}/${e.upstream_path}`) {
+        errors.push(`entry ${e.id}: vault_path must mirror its own source+upstream_path, got ${e.vault_path}`);
       }
     } else if (e.vault_path) {
       errors.push(`entry ${e.id}: status=${e.status} must not carry a vault_path (metadata-only)`);
-    }
-
-    if (isCandidate(e)) {
-      if (e.size_bytes == null) {
-        errors.push(`entry ${e.id}: auto-candidate requires a verified size_bytes`);
-      } else if (e.size_bytes > MAX_AUTO_CANDIDATE_BYTES) {
-        errors.push(`entry ${e.id}: auto-candidate size_bytes=${e.size_bytes} exceeds ${MAX_AUTO_CANDIDATE_BYTES} cap`);
-      }
     }
   }
 
@@ -213,13 +240,13 @@ export function cachePath(entry: Entry): string | null {
 }
 
 /** Rows eligible to appear in the lookup surface: installed, firstmate_candidate, reference-only only. */
-export function compactRows(catalog: Catalog): Entry[] {
+export function lookupSurface(catalog: Catalog): Entry[] {
   return catalog.entries
     .filter((e) => e.status in ALLOWED_LOOKUP_STATUSES)
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
-/** Deterministic base 8-column row shared by category shortlists and catalog.compact.tsv. */
+/** Deterministic base 8-column row shared by category shortlists and explicit-id lookups. */
 export function renderRow(entry: Entry): string {
   return [entry.id, entry.status, entry.activation, entry.scope, entry.categories.join(","), entry.cluster, cachePath(entry) ?? "", String(isCandidate(entry))].join("\t");
 }
@@ -245,17 +272,10 @@ export function renderIdRow(entry: Entry): string {
   return `${renderRow(entry)}\t${escapeTsvField(entry.notes)}`;
 }
 
-export function renderCompactTsv(catalog: Catalog): string {
-  const rows = compactRows(catalog).map((e) => renderRow(e));
-  return rows.join("\n") + (rows.length > 0 ? "\n" : "");
-}
-
-export function renderSourcesLock(catalog: Catalog): string {
-  const rows = Object.entries(catalog.sources)
-    .filter(([, s]) => s.pinned)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([sid, s]) => [sid, s.repo, s.sha].join("\t"));
-  return rows.join("\n") + (rows.length > 0 ? "\n" : "");
+/** Repo-relative path containment: stays under skills/upstream/ or skills/adapted/, no traversal. */
+export function isContainedVaultPath(path: string): boolean {
+  if (!path.startsWith("skills/upstream/") && !path.startsWith("skills/adapted/")) return false;
+  return !path.split("/").includes("..") && !path.startsWith("/") && !path.includes("\\");
 }
 
 /**
@@ -264,7 +284,7 @@ export function renderSourcesLock(catalog: Catalog): string {
  * even on an exact match, because those statuses are never surfaced to a picker.
  */
 export function lookupById(catalog: Catalog, id: string): Entry | null {
-  return compactRows(catalog).find((e) => e.id === id) ?? null;
+  return lookupSurface(catalog).find((e) => e.id === id) ?? null;
 }
 
 /**
@@ -276,7 +296,7 @@ export function lookupById(catalog: Catalog, id: string): Entry | null {
  * choice instead of informing it.
  */
 export function lookupByCategory(catalog: Catalog, category: string): Entry[] {
-  return compactRows(catalog)
+  return lookupSurface(catalog)
     .filter((e) => isCandidate(e) && e.categories.includes(category))
     .sort((a, b) => a.id.localeCompare(b.id));
 }

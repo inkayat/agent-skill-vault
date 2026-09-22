@@ -35,6 +35,28 @@ describe("skills.sh and Agentic Awesome Skills stay discovery metadata, never co
     }
   });
 
+  test("no vendored byte comes from an aggregator source (the inventory proves it, not just the entry rows)", async () => {
+    const catalog = await loadCatalog();
+    const fromAggregators = catalog.vendored.filter((v) => AGGREGATOR_SOURCES.includes(v.source));
+    expect(fromAggregators.map((v) => v.path)).toEqual([]);
+  });
+
+  test("agent-rules-books stays inert metadata with its licensing uncertainty stated on every row", async () => {
+    const catalog = await loadCatalog();
+    const source = catalog.sources["ciembor-agent-rules-books"];
+    expect(source.rights).toBe("derived-unreviewed");
+    expect(source.pinned).toBe(true); // pinned for provenance; nothing is ever fetched from it
+    const books = catalog.entries.filter((e) => e.source === "ciembor-agent-rules-books");
+    expect(books.length).toBeGreaterThan(0);
+    for (const e of books) {
+      expect(e.status, e.id).toBe("catalog");
+      expect(e.activation, e.id).toBe("never");
+      expect(e.vault_path, e.id).toBeNull();
+      expect(e.notes.toLowerCase(), e.id).toMatch(/chatgpt|derived|legal|criticism/);
+    }
+    expect(catalog.vendored.some((v) => v.source === "ciembor-agent-rules-books")).toBe(false);
+  });
+
   test("no catalog-status entry (metadata-only) is ever eligible for a worker pick", async () => {
     const catalog = await loadCatalog();
     const catalogEntries = catalog.entries.filter((e) => e.status === "catalog");

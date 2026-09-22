@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { Glob } from "bun";
 import { validateCatalog, type Catalog, type Source } from "../bin/lib/catalog.ts";
-import { loadCatalog } from "./helpers.ts";
+import { loadCatalog, repoRoot } from "./helpers.ts";
 
 const SHA_RE = /^[0-9a-f]{40}$/;
 
@@ -82,25 +83,30 @@ describe("catalog.yaml provenance (real)", () => {
     }
   });
 
-  test("known sources carry the expected exact repo and sha (spot-check against audited evidence)", async () => {
+  test("every source with vendored bytes is pinned at an exact commit, and every inventory row names a real source", async () => {
     const catalog = await loadCatalog();
-    const expected: Record<string, { repo: string; sha: string }> = {
-      "cursor-plugins-pstack": { repo: "cursor/plugins", sha: "6ed0f7a9504f577d7529064103cecce9be7dfc5e" },
-      "cursor-plugins-thermos": { repo: "cursor/plugins", sha: "6ed0f7a9504f577d7529064103cecce9be7dfc5e" },
-      "garrytan-gstack": { repo: "garrytan/gstack", sha: "a6b3a57512ca6d5c6aa5b68f74f736195021f96e" },
-      "hyhmrright-brooks-lint": { repo: "hyhmrright/brooks-lint", sha: "220fe716c01950966e961e020eda9c457f4dd0a7" },
-      "obra-superpowers": { repo: "obra/superpowers", sha: "5bf4e78011075bcfc0dc295f0724994cd123ee71" },
-      "addyosmani-agent-skills": { repo: "addyosmani/agent-skills", sha: "dc27a9c2e13721158157632de61b4106c6c2a2a1" },
-      "ciembor-agent-rules-books": { repo: "ciembor/agent-rules-books", sha: "893a88a6fce3a80c565bf39ac65021b43a8b2990" },
-      "anthropics-skills": { repo: "anthropics/skills", sha: "34040c9c568585f6929bedeaad110ad08f079624" },
-      "mattpocock-skills": { repo: "mattpocock/skills", sha: "c55ee46073ed923f86ce59a5eb3b6d895095d1b7" },
-      "supabase-agent-skills": { repo: "supabase/agent-skills", sha: "8331f910845103c08d51f6ca1d86ebb7d1f745e3" },
-    };
-    for (const [id, want] of Object.entries(expected)) {
-      const got = catalog.sources[id];
-      expect(got, id).toBeTruthy();
-      expect(got.repo, id).toBe(want.repo);
-      expect(got.sha, id).toBe(want.sha);
+    // The vendored inventory is the single pin authority: this asserts its integrity instead
+    // of restating each repo/sha here, which was a second copy to update on every pin bump.
+    const vendoredSources = new Set(catalog.vendored.map((v) => v.source));
+    expect(vendoredSources.size).toBeGreaterThan(0);
+    for (const sid of vendoredSources) {
+      const source = catalog.sources[sid];
+      expect(source, `inventory references unknown source ${sid}`).toBeTruthy();
+      expect(source.pinned, `${sid} has vendored bytes but is not pinned`).toBe(true);
+      expect(source.sha, sid).toMatch(SHA_RE);
+      expect(source.rights, `${sid} has vendored bytes, so its rights must be clear`).toBe("clear");
+    }
+  });
+
+  test("no test or generated file holds a second copy of a pin (catalog.yaml is the only authority)", async () => {
+    const catalog = await loadCatalog();
+    const shas = new Set(Object.values(catalog.sources).filter((s) => s.pinned).map((s) => s.sha));
+    const glob = new Glob("tests/**/*.ts");
+    for await (const file of glob.scan({ cwd: repoRoot(), onlyFiles: true })) {
+      const text = await Bun.file(`${repoRoot()}${file}`).text();
+      for (const sha of shas) {
+        expect(text.includes(sha), `${file} hardcodes the pin ${sha}; read it from catalog.yaml instead`).toBe(false);
+      }
     }
   });
 
@@ -109,6 +115,7 @@ describe("catalog.yaml provenance (real)", () => {
       version: 1,
       sources: { s: baseSource({ rights: "unclear", pinned: true }) },
       entries: [],
+      vendored: [],
     };
     expect(validateCatalog(bad).some((e) => e.includes("metadata-only"))).toBe(true);
   });
@@ -118,6 +125,7 @@ describe("catalog.yaml provenance (real)", () => {
       version: 1,
       sources: { s: baseSource({ sha: "not-a-sha" }) },
       entries: [],
+      vendored: [],
     };
     expect(validateCatalog(bad).some((e) => e.includes("not 40 hex"))).toBe(true);
   });

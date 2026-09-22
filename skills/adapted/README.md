@@ -41,18 +41,51 @@ unmodified original.
   and takes the spec directly from the task brief instead of an issue
   tracker. Everything else -- the fixed-point pinning process, the Fowler
   smell baseline, the two-axis separation rationale -- is unchanged.
+- **`brooks/brooks-test/SKILL.md`** -- adapted from
+  `hyhmrright/brooks-lint@220fe716c01950966e961e020eda9c457f4dd0a7:skills/brooks-test/SKILL.md`
+  (plus that skill's `test-guide.md` and the `skills/_shared/` framework files
+  it reads, at the same commit). The methodology is preserved: the Iron Law,
+  the six test decay risks with their book citations and "what not to flag"
+  guards, the five-step scan order, the suite map, the report template and the
+  health score. Removed: every project-mutating or stateful step -- the
+  `.brooks-lint.yaml` config load, the `.brooks-lint-history.json` history and
+  trend append, Post-Report Triage's `suppress:` writes, Remedy Mode's `--fix`
+  editing path, and the `brooks-sweep` pipeline hand-off -- plus the
+  interactive triage loop. The result is one self-contained, read-only file
+  instead of a five-file read chain. `tests/brooks-adaptation.test.ts` checks
+  that static contract and runs every shell command the body prescribes in a
+  disposable Git project, which stays byte-identical (`git status --porcelain`
+  empty, no `.brooks-lint*` artifact); it does not execute the review, which an
+  agent performs from the prompt.
+  The upstream `brooks-test` snapshot is deliberately not vendored: provenance
+  is the `Source:` header and the pinned commit.
+- **`pstack/blast-radius/SKILL.md`** -- adapted from
+  `cursor/plugins@6ed0f7a9504f577d7529064103cecce9be7dfc5e:pstack/skills/blast-radius/SKILL.md`.
+  The method is unchanged (find the breakage grep misses, name the one fact the
+  change is safe because of, prove it by running real code against the
+  how-sure-are-you ladder). Removed: every hand-off to a row a worker cannot
+  open here -- the "companion to `how` and `why`" framing, step 1's "use `why`
+  step 2" for PR context (now the direct `git log`/`git blame`/`git show`/
+  `gh pr view` commands), step 4's "same rules as `why`" (those evidence rules
+  are stated inline), and step 6's multi-model `arena` pass (now a second
+  independent pass by the same reviewer). This is the vault's only
+  `auto-candidate` adaptation, so it is also the one most worth re-reading on a
+  pin bump.
 
 Everything else in this vault's `auto-candidate` set passed the five-check
-eligibility gate (`bin/lib/catalog.ts`: `FORBIDDEN_MARKERS`, the 24KB size
-cap) **unmodified** -- no stripping or rewriting needed. `reference-only`
-bodies (pstack `why`/`architect`/`show-me-your-work`, all five Brooks Lint
-`brooks-*` skills, Superpowers `brainstorming`/`writing-plans`/
-`requesting-code-review`, Addy Osmani's browser-testing/interview/idea-refine
-skills, Anthropic `webapp-testing`, Matt Pocock's grilling/domain-modeling/
-architecture-review/research skills) are likewise vendored **unmodified**
-under `skills/upstream/`, readable by exact id -- they're `reference-only`
-because their *workflow* is interactive or tool-dependent, not because the
-text itself needed editing. Content that genuinely can't be shipped safely
-even as read-only reference (gstack's `gbrain:`/Claude-Code
-`allowed-tools`-tagged or `AUTO-GENERATED` bodies) is `catalog`
-(metadata-only, never vendored) instead of being force-adapted here.
+eligibility gate (`FORBIDDEN_MARKERS` in `bin/lib/catalog.ts`, plus the 24KB
+size cap measured on the real file by `tests/portability.test.ts`)
+**unmodified** -- no stripping or rewriting needed. `reference-only`
+bodies (pstack `show-me-your-work`/`figure-it-out`/`maintain-verification-skill`,
+the four remaining Brooks Lint `brooks-*` review skills, Superpowers
+`brainstorming`/`writing-plans`/`requesting-code-review`, Addy Osmani's
+browser-testing/interview/idea-refine skills, Anthropic `webapp-testing`,
+Matt Pocock's grilling/domain-modeling/codebase-design/research skills) are
+likewise vendored **unmodified** under `skills/upstream/`, readable by exact
+id -- they're `reference-only` because their *workflow* is interactive,
+tool-dependent, or orchestration-shaped, not because the text itself needed
+editing. Content that genuinely can't be shipped safely even as read-only
+reference (gstack's `gbrain:`/Claude-Code `allowed-tools`-tagged or
+`AUTO-GENERATED` bodies, and the skills whose process *is* subagent fan-out)
+is `catalog`/`restricted` (metadata-only, never vendored) instead of being
+force-adapted here.

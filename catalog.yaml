@@ -1,6 +1,7 @@
 # agent-skill-vault catalog
-# Hand-maintained source of truth. catalog.compact.tsv and sources.lock are GENERATED
-# from this file by bin/render.ts -- never edit those two files directly.
+# The single hand-maintained source of truth: sources (provenance/license), entries (curation),
+# and vendored (the authoritative inventory of every maintained byte under skills/).
+# Nothing here is generated; nothing regenerates from it. Edit, then run `bun test`.
 #
 # Vocabulary:
 #   status:     installed | firstmate_candidate | reference-only | catalog | team-only | restricted
@@ -11,13 +12,13 @@
 #   auto-candidate = eligible for a deliberate per-task FirstMate pick from a category shortlist,
 #     never automatic loading. explicit = only when the task text names the need. Never loaded
 #     globally; never registered in ~/.agents/skills or any OMP skills.customDirectories.
-#   candidate (status=firstmate_candidate AND activation=auto-candidate) is DERIVED, never stored,
-#     but IS emitted as the compact.tsv's last column.
+#   candidate (status=firstmate_candidate AND activation=auto-candidate) is DERIVED, never stored.
 #
 # Content model: firstmate-config pins/caches this repo's own root (not any upstream repo).
-#   firstmate_candidate AND reference-only rows both carry a real local vault_path:
+#   firstmate_candidate AND reference-only rows both carry a real local vault_path, and every
+#   vault_path must be a row in `vendored` (which owns that file's source, commit and hash):
 #     skills/upstream/<source-id>/<upstream_path>  -- untouched upstream snapshot, byte-identical
-#       to the pinned commit (content_sha256 records and tests/ verifies this).
+#       to the pinned commit.
 #     skills/adapted/<...>                         -- a rewritten derivative; the file itself opens
 #       with a Source:/Modifications: header (see skills/adapted/README.md).
 #   reference-only = explicit-id/captain reference only; NEVER category/auto selection
@@ -157,68 +158,57 @@ entries:
     scope: worker
     categories: []
     cluster: "architecture"
-    favorite: true
     installed_as: "api-and-interface-design"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "addy:browser-testing-with-devtools"
     source: addyosmani-agent-skills
     upstream_path: "skills/browser-testing-with-devtools/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/browser-testing-with-devtools/SKILL.md"
-    content_sha256: "4e3aacd6a380cd25bc6c2d67fdd1c926a9b22535b8a62109ecd33cefd909e3d9"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "ui"
-    favorite: true
     notes: "Requires the Chrome DevTools MCP server as a real external dependency. Workers in this harness use the native browser tool instead. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "addy:ci-cd-and-automation"
     source: addyosmani-agent-skills
     upstream_path: "skills/ci-cd-and-automation/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/ci-cd-and-automation/SKILL.md"
-    content_sha256: "a6ed8ed56456b01ff8314c44eefc69897d9905ae4e06bb2b7036286efb79b5f0"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: true
     notes: "Assumes a CI host (GitHub Actions etc.) in the target repo; scope per-project."
   - id: "addy:code-review-and-quality"
     source: addyosmani-agent-skills
     upstream_path: "skills/code-review-and-quality/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/code-review-and-quality/SKILL.md"
-    content_sha256: "8f3cabca581bbf7cb5f0add3f7454e7a4523f9d4353a6a4a217e6fa515309612"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["REVIEW"]
     cluster: "review"
-    favorite: true
     notes: "5-axis review, CI-evaluated per Addy Osmani's own comparison doc. Thermos + ponytail-review + tenth-man are sharper in this vault; explicit only."
   - id: "addy:code-simplification"
     source: addyosmani-agent-skills
     upstream_path: "skills/code-simplification/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/code-simplification/SKILL.md"
-    content_sha256: "f0c5ed754057eb0c1e027e2587f59de816651feb5e837242296c43ea21cf621d"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "simplification"
-    favorite: true
     notes: "Post-hoc simplification pass; ponytail (installed) already covers it."
   - id: "addy:constraint-driven-development"
     source: addyosmani-agent-skills
     upstream_path: "skills/constraint-driven-development/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/constraint-driven-development/SKILL.md"
-    content_sha256: "06479d4305f286d23cfb99f5dc85695896785269664e1f6a8d800e3b71e70c10"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: true
     notes: "Sets and enforces quality bars before build; portable, but a workflow choice the task text should name."
   - id: "addy:context-engineering"
     source: addyosmani-agent-skills
@@ -229,83 +219,67 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: true
     installed_as: "context-engineering"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "addy:debugging-and-error-recovery"
     source: addyosmani-agent-skills
     upstream_path: "skills/debugging-and-error-recovery/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/debugging-and-error-recovery/SKILL.md"
-    content_sha256: "21f3960f5d7ae2cc95c40896545004dbbcbbd752ea65fc2d53962554d4174220"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["DEEP"]
     cluster: "debugging"
-    favorite: true
     notes: "Structured debugging loop; systematic-debugging (installed) already covers it."
   - id: "addy:deprecation-and-migration"
     source: addyosmani-agent-skills
     upstream_path: "skills/deprecation-and-migration/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/deprecation-and-migration/SKILL.md"
-    content_sha256: "6a624f942e09c69863a4219b9bd5d56975026b67b0c70bc83385ffd2120b6142"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "IMPLEMENT-LARGE"]
     cluster: "implement"
-    favorite: true
-    size_bytes: 12642
     notes: "Clean-cutover discipline matches this harness's default."
   - id: "addy:documentation-and-adrs"
     source: addyosmani-agent-skills
     upstream_path: "skills/documentation-and-adrs/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/documentation-and-adrs/SKILL.md"
-    content_sha256: "87ae44a0c7bb3eefc2131a9d11caabcc14e4d8dcb27d66a3a675551ee2ce1671"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "ARCHITECTURE"]
     cluster: "docs"
-    favorite: true
-    size_bytes: 9848
     notes: "ADR discipline for architecture scouts' outputs."
   - id: "addy:doubt-driven-development"
     source: addyosmani-agent-skills
     upstream_path: "skills/doubt-driven-development/SKILL.md"
-    vault_path: "skills/upstream/addyosmani-agent-skills/skills/doubt-driven-development/SKILL.md"
-    content_sha256: "6fa1fcd8420c28daf7e53c5b08b0f20b907911efd2a6d9bce0b9740da20a4008"
-    status: firstmate_candidate
-    activation: explicit
+    vault_path: null
+    status: restricted
+    activation: never
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "verification"
-    favorite: true
-    notes: "Systematic self-skepticism; complements installed verification-before-completion (doubt-first vs verify-before-done), not a duplicate."
+    notes: "Explicitly written for a main-session orchestrator: Step 3 spawns a fresh-context reviewer subagent, and the cross-model step shells out to external model CLIs (`codex exec`, `gemini --approval-mode plan`). It also requires references/orchestration-patterns.md, an agent-orchestration catalog. Reclassified from firstmate_candidate in the post-merge hardening pass: a FirstMate worker owns neither subagent lifecycle nor external model CLIs. Metadata-only; the local body was removed."
   - id: "addy:frontend-ui-engineering"
     source: addyosmani-agent-skills
     upstream_path: "skills/frontend-ui-engineering/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/frontend-ui-engineering/SKILL.md"
-    content_sha256: "549044e9bd8d7fe993ce8e5c0d2b0f5465650676dc15805329973f936179eb1e"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["UI/BROWSER"]
     cluster: "ui"
-    favorite: true
-    size_bytes: 11712
     notes: "Frontend repos only (note)."
   - id: "addy:idea-refine"
     source: addyosmani-agent-skills
     upstream_path: "skills/idea-refine/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/SKILL.md"
-    content_sha256: "79e773058963adc7646b0115b4f8a4afc974c5ff95843e4ef1cafff3cb51899e"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "Early-stage idea sharpening upstream of /spec, interactive. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "addy:incremental-implementation"
     source: addyosmani-agent-skills
@@ -316,46 +290,37 @@ entries:
     scope: worker
     categories: []
     cluster: "implement"
-    favorite: true
     installed_as: "incremental-implementation"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "addy:interview-me"
     source: addyosmani-agent-skills
     upstream_path: "skills/interview-me/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/interview-me/SKILL.md"
-    content_sha256: "ace4b675999bb504593d572e0f73f3d7e803ad6fddf318445598c82c11939db2"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "Requirements-interrogation loop, interactive. Part of the grilling cluster; no pick between interview-me/grilling/brainstorming is needed since none auto-loads. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "addy:observability-and-instrumentation"
     source: addyosmani-agent-skills
     upstream_path: "skills/observability-and-instrumentation/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/observability-and-instrumentation/SKILL.md"
-    content_sha256: "e7fcb0820306d46268de9594d676ad98e35040858926c412b7000faa52a61f87"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: true
-    size_bytes: 13948
     notes: "When the task adds logging/metrics/tracing."
   - id: "addy:performance-optimization"
     source: addyosmani-agent-skills
     upstream_path: "skills/performance-optimization/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/performance-optimization/SKILL.md"
-    content_sha256: "00694d0c69bbde674d0e39de24052d90afea32d9fef9553eaee21a50a7e9b8cf"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["DEEP", "IMPLEMENT"]
     cluster: "performance"
-    favorite: true
-    size_bytes: 21717
     notes: "Measure-first perf loop; largest candidate body (~21.7KB, still under the 24KB cap)."
   - id: "addy:planning-and-task-breakdown"
     source: addyosmani-agent-skills
@@ -366,7 +331,6 @@ entries:
     scope: worker
     categories: []
     cluster: "planning"
-    favorite: true
     installed_as: "planning-and-task-breakdown"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "addy:security-and-hardening"
@@ -378,32 +342,27 @@ entries:
     scope: worker
     categories: []
     cluster: "security"
-    favorite: true
     installed_as: "security-and-hardening"
     notes: "Installed globally via firstmate-config external.lock. Pin refresh be4e44a9...->dc27a9c2... (external.lock, not a vault change) picks up PR #579's reference-file split (480 lines moved to references/hardening-patterns.md; same coverage, not a regression)."
   - id: "addy:source-driven-development"
     source: addyosmani-agent-skills
     upstream_path: "skills/source-driven-development/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/source-driven-development/SKILL.md"
-    content_sha256: "c59faf851377f0eeda45306398d16eb96d77ab1c2fd3e1a7fb58e9a0af33c1e9"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: true
     notes: "Grounding implementation in cited primary sources; distinct discipline, no in-vault overlap."
   - id: "addy:spec-driven-development"
     source: addyosmani-agent-skills
     upstream_path: "skills/spec-driven-development/SKILL.md"
     vault_path: "skills/upstream/addyosmani-agent-skills/skills/spec-driven-development/SKILL.md"
-    content_sha256: "f7129bca8742bad73f60209bd237e8b10dab6f1fae8576dc552fb1923bc1e721"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "planning"
-    favorite: true
     notes: "Spec-first workflow; anchors the /spec->/ship lifecycle if that lifecycle is wanted at all."
   - id: "books:a-philosophy-of-software-design"
     source: ciembor-agent-rules-books
@@ -414,7 +373,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:clean-architecture"
     source: ciembor-agent-rules-books
@@ -425,7 +383,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:clean-code"
     source: ciembor-agent-rules-books
@@ -436,7 +393,6 @@ entries:
     scope: worker
     categories: []
     cluster: "implement"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:code-complete"
     source: ciembor-agent-rules-books
@@ -447,7 +403,6 @@ entries:
     scope: worker
     categories: []
     cluster: "implement"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:designing-data-intensive-applications"
     source: ciembor-agent-rules-books
@@ -458,7 +413,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:domain-driven-design"
     source: ciembor-agent-rules-books
@@ -469,7 +423,6 @@ entries:
     scope: worker
     categories: []
     cluster: "architecture"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:domain-driven-design-distilled"
     source: ciembor-agent-rules-books
@@ -480,7 +433,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:implementing-domain-driven-design"
     source: ciembor-agent-rules-books
@@ -491,7 +443,6 @@ entries:
     scope: worker
     categories: []
     cluster: "architecture"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:patterns-of-enterprise-application-architecture"
     source: ciembor-agent-rules-books
@@ -502,7 +453,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:refactoring"
     source: ciembor-agent-rules-books
@@ -513,7 +463,6 @@ entries:
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "simplification"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:refactoring-guru"
     source: ciembor-agent-rules-books
@@ -524,7 +473,6 @@ entries:
     scope: worker
     categories: []
     cluster: "simplification"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:release-it"
     source: ciembor-agent-rules-books
@@ -535,7 +483,6 @@ entries:
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:the-pragmatic-programmer"
     source: ciembor-agent-rules-books
@@ -546,7 +493,6 @@ entries:
     scope: worker
     categories: []
     cluster: "implement"
-    favorite: false
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "books:working-effectively-with-legacy-code"
     source: ciembor-agent-rules-books
@@ -557,56 +503,47 @@ entries:
     scope: worker
     categories: ["IMPLEMENT-LARGE"]
     cluster: "implement"
-    favorite: true
     notes: "Reclassified catalog (metadata-only): ciembor/agent-rules-books rights=derived-unreviewed (docs/CRITICISM.md: ChatGPT-distilled from copyrighted books, upstream legal review unresolved). Per the captain's unclear-provenance rule, never copied locally; upstream_path retained for provenance only."
   - id: "brooks:brooks-audit"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-audit/SKILL.md"
     vault_path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-audit/SKILL.md"
-    content_sha256: "ba71c1211d12e66b9180a6cd7f28509566c818a803b93667b8dff0a28200a706"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "architecture"
-    favorite: false
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Architecture-audit mode (architecture-guide.md + onboarding-guide.md): whole-project module/dependency review. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. Overlaps the installed architecture-review; kept for its book-cited decay vocabulary, not as a second default."
   - id: "brooks:brooks-debt"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-debt/SKILL.md"
     vault_path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-debt/SKILL.md"
-    content_sha256: "8ee2164c75fe5f82ea6cd64ff62c32712c4d8d8539a4cba6620bd9a90b087151"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "implement"
-    favorite: false
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Tech-debt assessment mode (debt-guide.md): ranks existing debt by decay risk and remediation cost. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection."
   - id: "brooks:brooks-health"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-health/SKILL.md"
     vault_path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-health/SKILL.md"
-    content_sha256: "aee85b300826390a681da03c74cfbc80e96e28a9f5f6c47f6f6ea27bcda65d15"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "review"
-    favorite: false
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Health-dashboard mode (health-guide.md): whole-project score across the production and test decay risks. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. Its score is a report artifact only -- nothing here tracks it over time, because the history mechanism that would is exactly what must be skipped."
   - id: "brooks:brooks-review"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-review/SKILL.md"
     vault_path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-review/SKILL.md"
-    content_sha256: "e98b77fbb618109c9e74219721f1c1ca7a4b2ce60edbff40e850ea89e1c27b9e"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "review"
-    favorite: false
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "PR-review mode of Brooks Lint (pr-review-guide.md): diff-scoped decay review against the six production risks. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. For an unattended worker, the adapted brooks:brooks-test is the only Brooks entry point with those steps already removed."
   - id: "brooks:brooks-sweep"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-sweep/SKILL.md"
@@ -616,20 +553,17 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Unified scan + auto-fix: 'safe changes are auto-applied; risky changes are confirmed' behind a single one-time consent prompt, then iterates over modified files and their consumers until a clean round or a cap. Self-directed, multi-round, auto-committing; conflicts with the captain's no-commits-without-approval and task scoping."
   - id: "brooks:brooks-test"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-test/SKILL.md"
-    vault_path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-test/SKILL.md"
-    content_sha256: "f4c17c845913b7e4b677a9959c2e86d49c8d87781faddffcc82ee9622e439bb9"
-    status: reference-only
-    activation: never
+    vault_path: "skills/adapted/brooks/brooks-test/SKILL.md"
+    status: firstmate_candidate
+    activation: explicit
     scope: worker
     categories: []
     cluster: "tdd"
-    favorite: false
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Explicit test-quality specialist, served by the FirstMate-safe adaptation at skills/adapted/brooks/brooks-test/SKILL.md: one self-contained file carrying the Iron Law, T1-T6 with their book sources, the scan order and the report template, with upstream's .brooks-lint.yaml config load, .brooks-lint-history.json append, suppression writes, interactive triage and --fix path removed. Upstream snapshot deliberately not vendored: provenance is the Source header (hyhmrright/brooks-lint@220fe716...:skills/brooks-test/SKILL.md). tests/brooks-adaptation.test.ts checks the body's static content contract and executes every command it prescribes against a disposable Git project that must stay byte-identical; no test executes the review itself."
   - id: "discovery:agentic-awesome-skills"
     source: sickn33-agentic-awesome-skills
     upstream_path: null
@@ -639,20 +573,16 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "2,444-skill aggregator with a local MCP/CLI control plane (search_skills, compose_stack, Workbench) -- the fully built version of this vault's idea and the shape to avoid. Mixed licensing (MIT code / CC BY 4.0 docs / uneven per-skill upstream, at least one 'Not declared upstream'); mirroring would launder provenance. Discovery only, never mirrored."
   - id: "discovery:frontend-design"
     source: anthropics-skills
     upstream_path: "skills/frontend-design/SKILL.md"
     vault_path: "skills/upstream/anthropics-skills/skills/frontend-design/SKILL.md"
-    content_sha256: "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["UI/BROWSER"]
     cluster: "ui"
-    favorite: true
-    size_bytes: 9390
     notes: "Apache-2.0 per-skill; pure design-taste guidance; the only design-taste skill in the corpus with a clean, unambiguous license."
   - id: "discovery:skills-sh"
     source: vercel-labs-skills
@@ -663,20 +593,17 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Vercel Labs' discovery/leaderboard site and its `npx skills add` CLI. Confirms every canonical repo in this catalog is independently indexed under its own identity. Never a content source; the CLI installs into ~/.agents/skills and must not be run on this machine."
   - id: "discovery:supabase-postgres-best-practices"
     source: supabase-agent-skills
     upstream_path: "skills/supabase-postgres-best-practices/SKILL.md"
     vault_path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/SKILL.md"
-    content_sha256: "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855"
-    status: firstmate_candidate
-    activation: explicit
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: false
-    notes: "MIT, clean provenance, but project-specific (Postgres/Supabase projects only); a project-local skill in the relevant repo would outrank this vault row anyway."
+    notes: "Index, not a guide: the body is a category table plus 'read individual rule files', and the rules live in references/ -- 34 files upstream, of which exactly three are vendored here (query-missing-indexes.md, query-partial-indexes.md, and _sections.md, the category definitions). Demoted from firstmate_candidate/explicit in the post-merge hardening pass: handing a worker an index over 31 files it cannot open is worse than handing it nothing. Explicit-id reference only; a project-local Postgres skill, or the two vendored query rules read directly, outranks it."
   - id: "discovery:web-design-guidelines"
     source: vercel-labs-agent-skills
     upstream_path: null
@@ -686,19 +613,16 @@ entries:
     scope: worker
     categories: []
     cluster: "ui"
-    favorite: false
     notes: "No license file anywhere in vercel-labs/agent-skills (license: null via API, contents/LICENSE -> 404); the skill also live-fetches its ruleset from a second repo (vercel-labs/web-interface-guidelines) on every invocation. Metadata-only per the captain's unclear-license rule."
   - id: "discovery:webapp-testing"
     source: anthropics-skills
     upstream_path: "skills/webapp-testing/SKILL.md"
     vault_path: "skills/upstream/anthropics-skills/skills/webapp-testing/SKILL.md"
-    content_sha256: "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "ui"
-    favorite: false
     notes: "Apache-2.0 per-skill, but requires Python + Playwright plus a bundled with_server.py helper and a startable local dev server. This harness verifies UI through its native browser tool instead. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "gstack:benchmark"
     source: garrytan-gstack
@@ -709,7 +633,6 @@ entries:
     scope: worker
     categories: []
     cluster: "performance"
-    favorite: false
     notes: "29KB; on macOS instructs installing the proprietary Aside browser, otherwise builds gstack's own bundled browser via ./setup. Hard browser dependency either way (SKILL.md:175,208)."
   - id: "gstack:careful"
     source: garrytan-gstack
@@ -720,7 +643,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "3.5KB + bin/*.sh; Claude Code PreToolUse hook on the Bash matcher, runs on every Bash invocation. Fails open to 'ask' if its shared helper is missing. Design-pattern note only: fail-open-vs-fail-closed hook polarity is worth remembering for future FirstMate tool-gating work."
   - id: "gstack:cso"
     source: garrytan-gstack
@@ -731,7 +653,6 @@ entries:
     scope: worker
     categories: []
     cluster: "security"
-    favorite: false
     notes: "18KB; allowed-tools scoped to exactly a compiled launcher binary (`gstack-cso-launcher`) that pulls Docker images. Unreviewable supply chain from a read-only audit; explicitly refuses to use the repo/PATH/Bun/Node as a bypass."
   - id: "gstack:document-release"
     source: garrytan-gstack
@@ -742,7 +663,6 @@ entries:
     scope: captain
     categories: []
     cluster: "docs"
-    favorite: false
     notes: "41KB; edits CHANGELOG.md with an explicit Edit-only (never Write) discipline. The discipline is a one-sentence convention, not a 41KB skill. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:freeze"
     source: garrytan-gstack
@@ -753,7 +673,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "3.8KB + bin/check-freeze.sh; PreToolUse hook on Edit/Write matchers, fails closed to 'deny' (opposite polarity from careful, explicitly documented as intentional)."
   - id: "gstack:guard"
     source: garrytan-gstack
@@ -764,7 +683,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "3.4KB; careful + freeze composed on both Bash and Edit matchers. Inherits both host-specific hook dependencies with no independent content of its own."
   - id: "gstack:investigate"
     source: garrytan-gstack
@@ -775,7 +693,6 @@ entries:
     scope: captain
     categories: []
     cluster: "debugging"
-    favorite: false
     notes: "47KB; weakest of the three root-cause-debugging treatments in this manifest (gstack/pstack/superpowers) and the most host-coupled (hooks + gbrain). Prefer superpowers systematic-debugging (installed) if only one is used. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:office-hours"
     source: garrytan-gstack
@@ -786,7 +703,6 @@ entries:
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: false
     notes: "86KB generated body ('AUTO-GENERATED from SKILL.md.tmpl'); gbrain: context-query block against ~/.gstack/projects/...; Claude-Code allowed-tools (AskUserQuestion, WebSearch). 6-forcing-questions interrogation methodology readable by the human on request. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:plan-ceo-review"
     source: garrytan-gstack
@@ -797,7 +713,6 @@ entries:
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: false
     notes: "80KB; gbrain: context-query block against ~/.gstack/projects/{repo_slug}/ceo-plans/*.md. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:plan-eng-review"
     source: garrytan-gstack
@@ -808,7 +723,6 @@ entries:
     scope: captain
     categories: []
     cluster: "architecture"
-    favorite: false
     notes: "57KB; allowed-tools includes WebSearch (Claude-Code tool name); lighter dependency footprint than office-hours/plan-ceo-review. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:qa-only"
     source: garrytan-gstack
@@ -819,7 +733,6 @@ entries:
     scope: worker
     categories: []
     cluster: "ui"
-    favorite: false
     notes: "66KB; browser-driving half needs gstack's Aside/bundled-browser stack (proprietary macOS-only Aside or a bundled-browser build step). Report-only-discipline note is not worth a restricted body."
   - id: "gstack:repo"
     source: garrytan-gstack
@@ -830,7 +743,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Repo-level row for the 40 gstack items not individually named in the manifest. Host-generated (Bun, browser daemon, telemetry); README markets '23 specialists/8 power tools' but the repo has 54 SKILL.md directories at audit time -- headline counts are unverified, treat with suspicion."
   - id: "gstack:retro"
     source: garrytan-gstack
@@ -841,7 +753,6 @@ entries:
     scope: captain
     categories: []
     cluster: "retro"
-    favorite: false
     notes: "73KB; gbrain: context-query block (prior-retros, filesystem-kind query). Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:review"
     source: garrytan-gstack
@@ -852,7 +763,6 @@ entries:
     scope: captain
     categories: []
     cluster: "review"
-    favorite: false
     notes: "Row points at review/checklist.md (plain 183-line two-pass checklist), not the generated review/SKILL.md (61KB, declares the Agent tool and is AUTO-GENERATED from SKILL.md.tmpl). Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "gstack:spec"
     source: garrytan-gstack
@@ -863,153 +773,106 @@ entries:
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: false
     notes: "57KB; --dedupe phase shells out to `gh issue list --search`, requires GitHub CLI installed and authenticated. Five-phase spec methodology is the readable part. Reclassified catalog (metadata-only): host-generated body (gbrain:/Claude-Code allowed-tools blocks or AUTO-GENERATED templating); not shipped as a local reference. upstream_path retained for provenance only."
   - id: "mattpocock:code-review"
     source: mattpocock-skills
     upstream_path: "skills/engineering/code-review/SKILL.md"
     vault_path: "skills/adapted/mattpocock/code-review/SKILL.md"
-    content_sha256: "83f8a322e37864b039b49a68c52f6d526c5db3fc68c86637b5c89deb72ab8e51"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["REVIEW"]
     cluster: "review"
-    favorite: true
     notes: "Real adapted derivative at skills/adapted/mattpocock/code-review/SKILL.md (not the upstream path): parallel-subagent fan-out replaced with a single sequential in-process pass over both axes -- no subagent/Task/background-process primitive of any kind, host-independent by construction. The docs/agents/issue-tracker.md / setup-matt-pocock-skills spec bootstrap replaced with 'take the spec from the task brief'. setup-matt-pocock-skills is not vaulted and not needed."
   - id: "mattpocock:codebase-design"
     source: mattpocock-skills
     upstream_path: "skills/engineering/codebase-design/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/codebase-design/SKILL.md"
-    content_sha256: "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2"
-    status: firstmate_candidate
-    activation: auto-candidate
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["ARCHITECTURE", "REVIEW"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 6446
-    notes: "Deep-module vocabulary (module/interface/depth/seam/adapter); complements architecture-review without overlap."
+    notes: "Good design-it-twice methodology, but the SKILL and its DESIGN-IT-TWICE.md companion drive it by spinning up parallel sub-agents per candidate interface. Demoted from auto-candidate in the post-merge hardening pass per the captain's curation call (architecture-review stays the normal default); body plus DEEPENING.md/DESIGN-IT-TWICE.md kept for explicit-id/captain reference only."
   - id: "mattpocock:diagnosing-bugs"
     source: mattpocock-skills
     upstream_path: "skills/engineering/diagnosing-bugs/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/diagnosing-bugs/SKILL.md"
-    content_sha256: "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["DEEP"]
     cluster: "debugging"
-    favorite: true
     notes: "Fixed red->minimize->hypothesize->instrument->fix->regression-test loop; ships scripts/hitl-loop.template.sh (bash, host needs a shell). Overlaps installed systematic-debugging. Note: not both."
   - id: "mattpocock:domain-modeling"
     source: mattpocock-skills
     upstream_path: "skills/engineering/domain-modeling/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/domain-modeling/SKILL.md"
-    content_sha256: "327a2b50620e2fd70abc6893cd6965e76b20f8d0adb0dc2c8d5eb3845efb643e"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "architecture"
-    favorite: true
     notes: "Active domain-model sharpening (terms, scenarios); interactive, writes CONTEXT.md/ADRs (project conventions). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
-  - id: "mattpocock:grill-me"
-    source: mattpocock-skills
-    upstream_path: "skills/productivity/grill-me/SKILL.md"
-    vault_path: "skills/upstream/mattpocock-skills/skills/productivity/grill-me/SKILL.md"
-    content_sha256: "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637"
-    status: reference-only
-    activation: never
-    scope: captain
-    categories: []
-    cluster: "planning"
-    favorite: true
-    notes: "Router stub (157 bytes): 'Call the Skill tool with \"grilling\"'. Row exists for completeness; the real target is mattpocock:grilling below. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
-  - id: "mattpocock:grill-with-docs"
-    source: mattpocock-skills
-    upstream_path: "skills/engineering/grill-with-docs/SKILL.md"
-    vault_path: "skills/upstream/mattpocock-skills/skills/engineering/grill-with-docs/SKILL.md"
-    content_sha256: "7de372c13488f1ee96cc11cd8907b56b6809cc93eef776eeddd37de6b6cbe3fe"
-    status: reference-only
-    activation: never
-    scope: captain
-    categories: []
-    cluster: "planning"
-    favorite: true
-    notes: "Router stub (247 bytes): 'Call the Skill tool twice, for \"grilling\" and \"domain-modeling\"'. Row exists for completeness; the real targets are mattpocock:grilling and mattpocock:domain-modeling below. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "mattpocock:grilling"
     source: mattpocock-skills
     upstream_path: "skills/productivity/grilling/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md"
-    content_sha256: "10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: false
     notes: "Added under delegated stronger-alternative research (not a direct captain approval): the real target of the grill-me/grill-with-docs router stubs, which otherwise point at two-line files with no content of their own. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "mattpocock:handoff"
     source: mattpocock-skills
     upstream_path: "skills/productivity/handoff/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/productivity/handoff/SKILL.md"
-    content_sha256: "7c62de979fdc7ac32fb5ddb2146156c917f80ee070d30fadc9d40343c4b6ed25"
     status: firstmate_candidate
     activation: explicit
     scope: worker+captain
     categories: []
     cluster: "meta"
-    favorite: true
     notes: "Compacts an in-flight conversation into a handoff doc for another agent; writes to the OS temp dir. Useful when a worker must hand work to a successor task."
   - id: "mattpocock:improve-codebase-architecture"
     source: mattpocock-skills
     upstream_path: "skills/engineering/improve-codebase-architecture/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/improve-codebase-architecture/SKILL.md"
-    content_sha256: "d1ac25511a936ff4250a48dbcefda363837d6bb9321b3cba73df99fa37270a75"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "architecture"
-    favorite: true
     notes: "Scans for deepening opportunities, presents as an HTML report, grills through the chosen one. Interactive; not CI-automatable as-is. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "mattpocock:prototype"
     source: mattpocock-skills
     upstream_path: "skills/engineering/prototype/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/prototype/SKILL.md"
-    content_sha256: "714de632d116bb73f65cdb5a882db15b9369a6713b9a47c0fad827848f0bfbe3"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT", "UI/BROWSER"]
     cluster: "implement"
-    favorite: true
     notes: "Throwaway single-file HTML prototypes to answer design questions. Self-contained; task text names the need."
   - id: "mattpocock:research"
     source: mattpocock-skills
     upstream_path: "skills/engineering/research/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/research/SKILL.md"
-    content_sha256: "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "research"
-    favorite: true
     notes: "'Run as a background agent' -- an orchestration primitive not every host has. FirstMate's RESEARCH category is the mechanism here. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "mattpocock:resolving-merge-conflicts"
     source: mattpocock-skills
     upstream_path: "skills/engineering/resolving-merge-conflicts/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/engineering/resolving-merge-conflicts/SKILL.md"
-    content_sha256: "9d8114f8ef0b31f535a265fc05c364bd8cf2e2895a830040e06c22acb11f54b0"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "IMPLEMENT-LARGE"]
     cluster: "git"
-    favorite: true
-    size_bytes: 918
     notes: "Hunk-by-hunk conflict resolution traced to each side's intent, never --abort. Git-only, but every worker here is a git worktree."
   - id: "mattpocock:to-spec"
     source: mattpocock-skills
@@ -1020,7 +883,6 @@ entries:
     scope: worker
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "Publishes a spec to the issue tracker; same setup-matt-pocock-skills bootstrap dependency as wayfinder."
   - id: "mattpocock:to-tickets"
     source: mattpocock-skills
@@ -1031,7 +893,6 @@ entries:
     scope: worker
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "Breaks a plan into tracer-bullet tickets with blocking edges; full mode needs the tracker bootstrap (has a degraded local-file fallback, still restricted here since FirstMate owns task lifecycle)."
   - id: "mattpocock:wayfinder"
     source: mattpocock-skills
@@ -1042,33 +903,27 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: true
     notes: "Multi-session planning as a decision-ticket map on an issue tracker; requires setup-matt-pocock-skills tracker wiring. FirstMate owns task lifecycle."
   - id: "mattpocock:writing-for-agents"
     source: mattpocock-skills
     upstream_path: "skills/productivity/writing-for-agents/SKILL.md"
     vault_path: "skills/upstream/mattpocock-skills/skills/productivity/writing-for-agents/SKILL.md"
-    content_sha256: "551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "docs"
-    favorite: true
-    size_bytes: 10886
     notes: "How to write skills/AGENTS.md/CLAUDE.md/agent-reachable docs. Directly relevant to firstmate-config and vault maintenance."
   - id: "pstack:architect"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/architect/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/architect/SKILL.md"
-    content_sha256: "897a59beaa3cab107d98c256206e062cc4a5e9421a45b9d462fbded19291fea5"
-    status: reference-only
+    vault_path: null
+    status: restricted
     activation: never
     scope: captain
     categories: []
     cluster: "architecture"
-    favorite: false
-    notes: "Phase B is arena with four Cursor model runners. architecture-review + the architecture role already cover the decision shape. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Design skill whose process runs through references/runner-prompt.md (a subagent runner brief) plus two further reference files that were never vendored. Reclassified from reference-only in the post-merge hardening pass rather than vendoring orchestration prompts; metadata-only, local body removed."
   - id: "pstack:arena"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/arena/SKILL.md"
@@ -1078,57 +933,47 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "N-parallel-attempt fan-out via Cursor's parallel-subagent/model dispatch. Team Mode material; concept maps onto task/workpool if ever rewritten."
   - id: "pstack:blast-radius"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/blast-radius/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md"
-    content_sha256: "20cb2945f5fe62055166f745107274af5f19428ca033e53a9b8bc69650d3ded1"
+    vault_path: "skills/adapted/pstack/blast-radius/SKILL.md"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["REVIEW", "DEEP"]
     cluster: "review"
-    favorite: true
-    size_bytes: 4016
-    notes: "Prove the one safety fact by running code. Note: skip the arena step."
+    notes: "Prove the one safety fact by running code. Served by the self-contained adaptation at skills/adapted/pstack/blast-radius/SKILL.md: upstream's hand-offs to `how`/`why`/`arena` (all inert here) are replaced with the direct git log/git blame/git show/gh pr view commands step 1 meant, the evidence rules `why` held are stated inline, and the multi-model arena pass became a second independent pass by the same reviewer."
   - id: "pstack:create-verification-skill"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/create-verification-skill/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/create-verification-skill/SKILL.md"
-    content_sha256: "644f2551403c1bca01a2855b34611b6e7be0ce0dc5b204514c376c0f6a6e6ac4"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "meta"
-    favorite: true
     notes: "Emits output at a hard-coded Cursor path (.cursor/skills/verify-<app>/). Note: emit under the project's tracked .agents/skills/; never .cursor/."
   - id: "pstack:figure-it-out"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/figure-it-out/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/figure-it-out/SKILL.md"
-    content_sha256: "e041c64a39f1084a20e60ee99762c4dbd3ec8be56ed33fd68ea867b8bd8bd3e4"
-    status: firstmate_candidate
-    activation: explicit
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["DEEP", "IMPLEMENT-LARGE"]
     cluster: "meta"
-    favorite: true
-    notes: "Portable playbook-design method; routes one-way-door decisions to architect->arena. Note: use architecture-review instead."
+    notes: "Strong decomposition heuristics, but step 3 tells the reader to fan work out and give each worker its own worktree or branch -- FirstMate owns worktrees and branches. Demoted from firstmate_candidate/explicit in the post-merge hardening pass; body kept for explicit-id/captain reference only, never category/auto selection."
   - id: "pstack:how"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/how/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/how/SKILL.md"
-    content_sha256: "06b714dbd830bc829bfb89e33a1c39daf6d72ea412e488ea9d65f5f33b885a0c"
-    status: firstmate_candidate
-    activation: explicit
+    vault_path: null
+    status: restricted
+    activation: never
     scope: worker
     categories: ["EXPLORE", "RESEARCH"]
     cluster: "explore"
-    favorite: true
-    notes: "Every mode spawns Task subagents (SKILL.md:16-44); bounded micro-orchestration under OMP task helpers only, cannot run on Pi. Note: run explorers as OMP task helpers; single pass on Pi."
+    notes: "Pure fan-out router: spawns parallel Task explorers (`subagent_type: generalPurpose`) plus a synthesizer subagent, with per-role model pins, and reads references/explorer-prompt.md + references/explainer-prompt.md as subagent prompts. Reclassified from firstmate_candidate in the post-merge hardening pass; metadata-only, local body removed."
   - id: "pstack:interrogate"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/interrogate/SKILL.md"
@@ -1138,20 +983,17 @@ entries:
     scope: worker
     categories: []
     cluster: "review"
-    favorite: false
     notes: "Multi-model adversarial review; spawns one reviewer per configured model. Team Mode material."
   - id: "pstack:maintain-verification-skill"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/maintain-verification-skill/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/maintain-verification-skill/SKILL.md"
-    content_sha256: "515c0eaa054b3f6be1b1fb06f2c2f173c80fddb58bbcac57576f89c479bc68e8"
-    status: firstmate_candidate
-    activation: explicit
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "meta"
-    favorite: true
-    notes: "Feature-map drift audit for a skill emitted by create-verification-skill. Same path-rewrite note; depends on that skill's output existing."
+    notes: "Its 'source wave' step launches one read-only subagent per feature file, concurrently. Demoted from firstmate_candidate/explicit in the post-merge hardening pass; body kept for explicit-id/captain reference only, never category/auto selection."
   - id: "pstack:poteto-mode"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/poteto-mode/SKILL.md"
@@ -1161,172 +1003,116 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Sticky cross-turn router persisting across turns; routes to nearly every pstack skill via Cursor /loop, Cursor Rules, and the multi-model panel. The exact upstream-orchestration-as-active-behavior the captain's intent forbids. Playbook outlines are design reference only."
-  - id: "pstack:principle-attack-the-premise"
-    source: cursor-plugins-pstack
-    upstream_path: "pstack/skills/principle-attack-the-premise/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-attack-the-premise/SKILL.md"
-    content_sha256: "c87bd7536f772f8a403ad8155535ee17a1bbec9a353156693eb3bb1520c87ae3"
-    status: firstmate_candidate
-    activation: auto-candidate
-    scope: worker
-    categories: ["DEEP"]
-    cluster: "debugging"
-    favorite: false
-    size_bytes: 1941
-    notes: "Added under delegated stronger-alternative research (not a direct captain approval). Narrow DEEP trigger: when two or more fixes sharing one premise have failed the same gate, question the premise."
   - id: "pstack:principle-boundary-discipline"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-boundary-discipline/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-boundary-discipline/SKILL.md"
-    content_sha256: "62ac2862c2caa22dd14531f51c9c6bb445ceb198ca98a687e25b4d47c1f10a28"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["ARCHITECTURE", "IMPLEMENT"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 1883
     notes: "Guards at boundaries, pure core."
   - id: "pstack:principle-encode-lessons-in-structure"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-encode-lessons-in-structure/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-encode-lessons-in-structure/SKILL.md"
-    content_sha256: "77044c83a9ac6df78fc643887ea5f1f11f082adaf14b717c060cdaed03cce863"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["REVIEW", "IMPLEMENT"]
     cluster: "meta"
-    favorite: true
-    size_bytes: 2211
     notes: "Lint/check over prose."
   - id: "pstack:principle-fix-root-causes"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-fix-root-causes/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-fix-root-causes/SKILL.md"
-    content_sha256: "ba4cd38da1dcc8fe5432feb64457cba95594736a9b21b2ebf8f8c52aee068707"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["DEEP"]
     cluster: "debugging"
-    favorite: true
     notes: "Restates installed systematic-debugging at card scale; complementary, not a duplicate."
   - id: "pstack:principle-foundational-thinking"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-foundational-thinking/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-foundational-thinking/SKILL.md"
-    content_sha256: "864b827e8199d946ce58beca0f89c4ed4099ed6e426fb698a3aaa45de2a9eea2"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["ARCHITECTURE", "IMPLEMENT-LARGE"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 1530
     notes: "Structural decisions (data structures first, scaffold before features) protect option value; the principle every downstream design skill in this vault assumes."
   - id: "pstack:principle-guard-the-context-window"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-guard-the-context-window/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-guard-the-context-window/SKILL.md"
-    content_sha256: "9f60e2c79b35f865cb103462f9128c6760b70f603475d1e535e5930f61840f66"
-    status: firstmate_candidate
-    activation: auto-candidate
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["DEEP", "IMPLEMENT-LARGE"]
     cluster: "delegation"
-    favorite: true
-    size_bytes: 1067
-    notes: "Only meaningful where task helpers exist (OMP)."
+    notes: "Its mechanism is 'route bulk output to subagents, keep summaries in the main thread' -- a main-session orchestration move a FirstMate worker cannot make. Demoted from auto-candidate in the post-merge hardening pass; body kept for explicit-id/captain reference only. Referenced by pstack:principle-minimize-reader-load as the human analogue."
   - id: "pstack:principle-make-operations-idempotent"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-make-operations-idempotent/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-make-operations-idempotent/SKILL.md"
-    content_sha256: "540738217c3da7bf513b9886924ad6a2bc77e58be867f5bd2e1831c74bf2ce70"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    favorite: true
-    size_bytes: 1390
     notes: "Installers, scripts, reconcilers -- this fleet's bread and butter."
   - id: "pstack:principle-minimize-reader-load"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-minimize-reader-load/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-minimize-reader-load/SKILL.md"
-    content_sha256: "42551c5dc74cd578163c148da552db3ff67d29b78600ef216bfd311fb828fe69"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "simplification"
-    favorite: true
-    notes: "ponytail (installed) already says this; explicit only."
+    notes: "Kept as an explicit complement, not a Ponytail duplicate: Ponytail argues for less code, this one measures maintainability as reader work along two independent axes (layers to trace, state to hold) and names interface compression. Its sibling pstack:principle-subtract-before-you-add was removed in the post-merge hardening pass as a straight Ponytail restatement."
   - id: "pstack:principle-model-the-domain"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-model-the-domain/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-model-the-domain/SKILL.md"
-    content_sha256: "bbadbb9a723fac3f76e782ae45665eb94058ec10993e4bae36d4dc6b0e4eac07"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["ARCHITECTURE"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 2082
     notes: "Encode the domain in a structure instead of scattered conditionals; state-machine/typed-model/discriminated-union guidance."
   - id: "pstack:principle-prove-it-works"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-prove-it-works/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-prove-it-works/SKILL.md"
-    content_sha256: "ae13d287984a5864312b6286899d4ee2b60f8272b5e5e8fcc586a7c3ea51020b"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: []
     cluster: "verification"
-    favorite: true
     notes: "Restates installed verification-before-completion at card scale; complementary framing, not a merge."
-  - id: "pstack:principle-subtract-before-you-add"
-    source: cursor-plugins-pstack
-    upstream_path: "pstack/skills/principle-subtract-before-you-add/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-subtract-before-you-add/SKILL.md"
-    content_sha256: "a983a50e732c1ed315eba7aaf47a61329e31c4794eb1ab9d25d9945265b31e03"
-    status: firstmate_candidate
-    activation: explicit
-    scope: worker
-    categories: ["IMPLEMENT"]
-    cluster: "simplification"
-    favorite: true
-    notes: "ponytail (installed) already says this; explicit only."
   - id: "pstack:principle-test-behavior-not-implementation"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-test-behavior-not-implementation/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-test-behavior-not-implementation/SKILL.md"
-    content_sha256: "87e40efe4e486f7ea639d2ed1fc0abe6c93b8fd0e89a81218086909d2470a52e"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "REVIEW"]
     cluster: "tdd"
-    favorite: true
-    size_bytes: 2575
     notes: "Matches this harness's own test bar."
   - id: "pstack:principle-type-system-discipline"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/principle-type-system-discipline/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-type-system-discipline/SKILL.md"
-    content_sha256: "c83da8031ffb4c86410030d3e261f659598fca2b7d8158fd9dc269d70a3a025e"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "ARCHITECTURE", "REVIEW"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 4922
     notes: "Best typed-language design reminder in the corpus."
   - id: "pstack:reflect"
     source: cursor-plugins-pstack
@@ -1337,19 +1123,16 @@ entries:
     scope: worker
     categories: []
     cluster: "retro"
-    favorite: true
     notes: "Spawns three parallel review subagents over the active Cursor transcript. No FirstMate equivalent to 'the active transcript' as a first-class object."
   - id: "pstack:show-me-your-work"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/show-me-your-work/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/show-me-your-work/SKILL.md"
-    content_sha256: "831e85ba3f84f38bf338cd03e6af050fea357752e25a825e334c99f59d7f2077"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "verification"
-    favorite: true
     notes: "Decision-log TSV concept is portable, but SKILL.md:56 reads Cursor agent-transcripts/ and :67 spawns a cross-model subagent for the end audit. Scout reports already carry a decision trail. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "pstack:swarm"
     source: cursor-plugins-pstack
@@ -1360,82 +1143,67 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "N-parallel-cloud-worker fan-out via Cursor's cloud-agent infrastructure. Team Mode material."
   - id: "pstack:tdd"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/tdd/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/tdd/SKILL.md"
-    content_sha256: "011cab0ecc04a3632121efb493ae4d60aa282a9b72c66de74dd8ad7e4313e05a"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["QUICK", "IMPLEMENT"]
     cluster: "tdd"
-    favorite: false
     notes: "Added under delegated stronger-alternative research (not a direct captain approval). Bug-fix-scoped TDD, lighter than the installed superpowers ritual; 'prefer no new test over a bad test'."
   - id: "pstack:technical-writing"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/technical-writing/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/technical-writing/SKILL.md"
-    content_sha256: "6d6d9e625ae412ee8f36df8deb6fd9203d7c6acca776d5ee3cabbb9126f8b84c"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "docs"
-    favorite: true
     notes: "Diataxis/Google-style/STE layered writing standard. References unslop (same repo)."
   - id: "pstack:typescript-best-practices"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/typescript-best-practices/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/typescript-best-practices/SKILL.md"
-    content_sha256: "28f9e61710e205f6f3c5476f333483cff0e988f6a5b639e2faad536344b40c5e"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "REVIEW"]
     cluster: "architecture"
-    favorite: true
-    size_bytes: 2684
     notes: "TypeScript/TSX projects only (paths trigger); pair with principle-type-system-discipline, which it says to apply first."
   - id: "pstack:unslop"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/unslop/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/unslop/SKILL.md"
-    content_sha256: "c6d2572294d933a428211921069e9a248490e9b466ca59437cb4d9de248600ca"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["RESEARCH", "REVIEW", "ARCHITECTURE", "TENTH-MAN"]
     cluster: "docs"
-    favorite: true
-    size_bytes: 6093
     notes: "Report-producing categories only; no side effects."
   - id: "pstack:why"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/why/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/why/SKILL.md"
-    content_sha256: "222b93789754ba6ee901835137184acdca667f7e47c523bcc85aca86675fb249"
-    status: reference-only
+    vault_path: null
+    status: restricted
     activation: never
     scope: captain
     categories: []
     cluster: "debugging"
-    favorite: false
-    notes: "Discovers and queries up to 7 MCP categories in parallel at run time; hard dependency on an MCP-rich environment. references/epistemics.md (confidence framework) is the reference-worthy part. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Root-cause research skill built on parallel investigator subagents plus a synthesizer subagent (references/investigator-prompt.md, references/synthesizer-prompt.md, references/source-playbook.md -- none vendored). Reclassified from reference-only in the post-merge hardening pass; metadata-only, local body and its epistemics.md reference removed. systematic-debugging remains the default root-cause path."
   - id: "superpowers:brainstorming"
     source: obra-superpowers
     upstream_path: "skills/brainstorming/SKILL.md"
     vault_path: "skills/upstream/obra-superpowers/skills/brainstorming/SKILL.md"
-    content_sha256: "a32d2255354775aa124855aa7100cf276bea096fff4ebb3a0edf57be216e6c72"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: true
-    notes: "One-question-at-a-time spec elicitation; needs the human. Named in the README as the primary process skill alongside systematic-debugging. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "The strongest interactive requirements-shaping interview in the vault; captain-scope, explicit-id reference only. Its optional visual companion (visual-companion.md plus scripts/start-server.sh -> server.cjs, a Node HTTP server) is deliberately not vendored -- an offline text vault does not carry a server stack -- so the companion pointer in the body is inert here."
   - id: "superpowers:diagnosing-superpowers"
     source: obra-superpowers
     upstream_path: "skills/diagnosing-superpowers/SKILL.md"
@@ -1445,7 +1213,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Self-diagnostic for the Superpowers plugin's own install layout; not meaningful without a FirstMate-native rewrite diagnosing the vault instead."
   - id: "superpowers:dispatching-parallel-agents"
     source: obra-superpowers
@@ -1456,7 +1223,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: true
     notes: "Dispatch-when-independent, one-agent-per-domain delegation methodology written in Claude Code Task-subagent vocabulary throughout. Team Mode material."
   - id: "superpowers:executing-plans"
     source: obra-superpowers
@@ -1467,7 +1233,6 @@ entries:
     scope: worker
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "Plan-execution methodology referencing subagent/worktree mechanics throughout. Team Mode material."
   - id: "superpowers:finishing-a-development-branch"
     source: obra-superpowers
@@ -1478,32 +1243,26 @@ entries:
     scope: worker
     categories: []
     cluster: "git"
-    favorite: true
     notes: "Plain git/PR conventions, but merge/PR decisions are FirstMate-owned; never automatic merge."
   - id: "superpowers:receiving-code-review"
     source: obra-superpowers
     upstream_path: "skills/receiving-code-review/SKILL.md"
     vault_path: "skills/upstream/obra-superpowers/skills/receiving-code-review/SKILL.md"
-    content_sha256: "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["IMPLEMENT", "IMPLEMENT-LARGE", "UI/BROWSER", "DEEP"]
     cluster: "review"
-    favorite: true
-    size_bytes: 6203
     notes: "Verify-before-implementing review feedback -- exactly the validate/steer loop."
   - id: "superpowers:requesting-code-review"
     source: obra-superpowers
     upstream_path: "skills/requesting-code-review/SKILL.md"
     vault_path: "skills/upstream/obra-superpowers/skills/requesting-code-review/SKILL.md"
-    content_sha256: "cfcee1b06774e7c0517f1e09be1a11f2d5680257072723e709ddbcf7e08b795a"
     status: reference-only
     activation: never
     scope: worker
     categories: []
     cluster: "review"
-    favorite: true
     notes: "Dispatches a general-purpose reviewer subagent (SKILL.md:8,32-34). FirstMate already reviews through separate tasks. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "superpowers:subagent-driven-development"
     source: obra-superpowers
@@ -1514,7 +1273,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: true
     notes: "Same Claude-Code Task vocabulary as dispatching-parallel-agents. Team Mode material."
   - id: "superpowers:systematic-debugging"
     source: obra-superpowers
@@ -1525,7 +1283,6 @@ entries:
     scope: worker
     categories: []
     cluster: "debugging"
-    favorite: true
     installed_as: "systematic-debugging"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "superpowers:test-driven-development"
@@ -1537,7 +1294,6 @@ entries:
     scope: worker
     categories: []
     cluster: "tdd"
-    favorite: true
     installed_as: "test-driven-development"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "superpowers:using-git-worktrees"
@@ -1549,7 +1305,6 @@ entries:
     scope: worker
     categories: []
     cluster: "git"
-    favorite: true
     notes: "Plain git worktree usage, no host coupling, but worktree creation is FirstMate-owned (primary-policy.md)."
   - id: "superpowers:using-superpowers"
     source: obra-superpowers
@@ -1560,7 +1315,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: true
     notes: "Forces every-turn auto-invocation ('IF A SKILL APPLIES ... YOU DO NOT HAVE A CHOICE ... not negotiable') via Claude Code/Cursor/Windows session-start hooks. Must never auto-select, confirmed by direct evidence."
   - id: "superpowers:verification-before-completion"
     source: obra-superpowers
@@ -1571,45 +1325,38 @@ entries:
     scope: worker
     categories: []
     cluster: "verification"
-    favorite: true
     installed_as: "verification-before-completion"
     notes: "Installed globally via firstmate-config external.lock; reference by name, not by vault path."
   - id: "superpowers:writing-plans"
     source: obra-superpowers
     upstream_path: "skills/writing-plans/SKILL.md"
     vault_path: "skills/upstream/obra-superpowers/skills/writing-plans/SKILL.md"
-    content_sha256: "0bc3d36590f7b2c323ed3ec18ff77e9f8ed57af42f5680a02b11a2d20de265cf"
     status: reference-only
     activation: never
     scope: captain
     categories: []
     cluster: "planning"
-    favorite: true
     notes: "References subagent-driven-development/executing-plans/using-git-worktrees by name; FirstMate plans through briefs instead. Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
   - id: "superpowers:writing-skills"
     source: obra-superpowers
     upstream_path: "skills/writing-skills/SKILL.md"
-    vault_path: "skills/upstream/obra-superpowers/skills/writing-skills/SKILL.md"
-    content_sha256: "bbdfe742f853562e643a3d40d64476359d47881e39cef80a189283fa26d11ab9"
-    status: firstmate_candidate
-    activation: explicit
+    vault_path: null
+    status: restricted
+    activation: never
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "meta"
-    favorite: true
-    notes: "Meta-skill for authoring new skills; directly relevant to vault and firstmate-config maintenance. Subagent pressure-tests are optional. Note: skip subagent pressure tests on Pi."
+    notes: "Skill-authoring methodology whose test loop is 'run the pressure scenario with a subagent', and whose paths are host-bound (`~/.claude/skills/`, ../using-superpowers/references/{codex,gemini}-tools.md, scripts/tool.sh -- none vendored, and two of them document external model CLIs). Reclassified from firstmate_candidate in the post-merge hardening pass; metadata-only, local body removed."
   - id: "thermos:thermo-nuclear-code-quality-review"
     source: cursor-plugins-thermos
     upstream_path: "thermos/skills/thermo-nuclear-code-quality-review/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-code-quality-review/SKILL.md"
-    content_sha256: "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f"
     status: firstmate_candidate
     activation: explicit
     scope: worker
     categories: ["REVIEW"]
     cluster: "review"
-    favorite: true
-    notes: "1k-line rule / spaghetti / abstraction-rot review. Overlaps ponytail-review; explicit, REVIEW scouts only. Note: not together with ponytail-review."
+    notes: "Structure/quality half of the Thermos pair. Explicit only, and never stacked with Ponytail in one brief: both argue for less code and a worker given both spends its budget arbitrating between them. Its 'orchestration' language is about the reviewed code's control flow, not agent orchestration."
   - id: "thermos:thermo-nuclear-code-quality-review-subagent"
     source: cursor-plugins-thermos
     upstream_path: "thermos/agents/thermo-nuclear-code-quality-review-subagent.md"
@@ -1619,21 +1366,17 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Same nested-fan-out pattern as thermo-nuclear-review-subagent."
   - id: "thermos:thermo-nuclear-review"
     source: cursor-plugins-thermos
     upstream_path: "thermos/skills/thermo-nuclear-review/SKILL.md"
     vault_path: "skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-review/SKILL.md"
-    content_sha256: "5091011c4490932d40658ae958fb55b9aaca8e2bba5196860295ab945180e434"
     status: firstmate_candidate
-    activation: auto-candidate
+    activation: explicit
     scope: worker
     categories: ["REVIEW"]
     cluster: "review"
-    favorite: true
-    size_bytes: 4547
-    notes: "Diff-scoped bugs/breakage/security/devex/feature-gate-leak audit with an over-reporting guard. No subagent text in the file (verified: no subagent_type/run_in_background/Task). gh/glab optional for post-audit PR discussion."
+    notes: "Correctness-first review with an explicit severity bar. Retained as an explicit high-risk specialist (demoted from auto-candidate in the post-merge hardening pass): it is deliberately harsh and expensive, so a task names it when the risk warrants, rather than it landing on an ordinary shortlist."
   - id: "thermos:thermo-nuclear-review-subagent"
     source: cursor-plugins-thermos
     upstream_path: "thermos/agents/thermo-nuclear-review-subagent.md"
@@ -1643,7 +1386,6 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Cursor Task subagent definition that itself spawns two more named Cursor subagent types (shell, explore) before doing its own work."
   - id: "thermos:thermos"
     source: cursor-plugins-thermos
@@ -1654,5 +1396,448 @@ entries:
     scope: worker
     categories: []
     cluster: "meta"
-    favorite: false
     notes: "Dual-subagent launcher: run_in_background: true plus two subagent_types. The orchestration layer itself; excluded per captain's intent."
+
+# Authoritative vendored-file inventory: every maintained byte under skills/, one row per file.
+# This is the single authority for what is vendored, from which source/commit, and at which
+# hash -- entries above carry no second copy of a hash, and no test hardcodes a pin. A pin bump
+# re-fetches every row of the affected source and updates its sha256 here (see README.md).
+#   path:          repo-relative local file. skills/upstream/<source>/<upstream_path> is a
+#                  byte-identical snapshot; skills/adapted/... is a rewritten derivative.
+#   source:        key in sources: above (provenance; supplies repo + commit).
+#   upstream_path: path inside the source repo at that commit, or null for an adaptation
+#                  (a derivative is not byte-identical to any single upstream file).
+#   sha256:        sha256 of the local file's bytes; verified on every test run.
+vendored:
+  - path: "skills/adapted/brooks/brooks-test/SKILL.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: null
+    sha256: "ec2a983737e2d31d3792afbeb0f41ef5e31b55057f01d89f1c14a53c554d591a"
+  - path: "skills/adapted/mattpocock/code-review/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: null
+    sha256: "83f8a322e37864b039b49a68c52f6d526c5db3fc68c86637b5c89deb72ab8e51"
+  - path: "skills/adapted/pstack/blast-radius/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: null
+    sha256: "911fdf31b162cf1ba30cf4f4679b65782cc8e62060d2485e0a54900953be4fc5"
+  - path: "skills/upstream/addyosmani-agent-skills/LICENSE"
+    source: addyosmani-agent-skills
+    upstream_path: "LICENSE"
+    sha256: "6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7"
+  - path: "skills/upstream/addyosmani-agent-skills/references/accessibility-checklist.md"
+    source: addyosmani-agent-skills
+    upstream_path: "references/accessibility-checklist.md"
+    sha256: "61c759d94d52296231f5f310b92b401f56c44e4430dc3cc95ebac5d7b1d5ffac"
+  - path: "skills/upstream/addyosmani-agent-skills/references/observability-checklist.md"
+    source: addyosmani-agent-skills
+    upstream_path: "references/observability-checklist.md"
+    sha256: "25fcd0e854596a5ab6f11b002050d245bf78f5ae0fcbd1df699b89451ae0e1e8"
+  - path: "skills/upstream/addyosmani-agent-skills/references/performance-checklist.md"
+    source: addyosmani-agent-skills
+    upstream_path: "references/performance-checklist.md"
+    sha256: "40f564d1e62341e277c01ba42c42d95264b9ef3b8e5a23249dc6e121a7e70067"
+  - path: "skills/upstream/addyosmani-agent-skills/references/security-checklist.md"
+    source: addyosmani-agent-skills
+    upstream_path: "references/security-checklist.md"
+    sha256: "37774056502fe8970dcd2fd27dca5fa31f2a55232649fc3056c89c3af7d62755"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/browser-testing-with-devtools/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/browser-testing-with-devtools/SKILL.md"
+    sha256: "4e3aacd6a380cd25bc6c2d67fdd1c926a9b22535b8a62109ecd33cefd909e3d9"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/ci-cd-and-automation/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/ci-cd-and-automation/SKILL.md"
+    sha256: "a6ed8ed56456b01ff8314c44eefc69897d9905ae4e06bb2b7036286efb79b5f0"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/code-review-and-quality/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/code-review-and-quality/SKILL.md"
+    sha256: "8f3cabca581bbf7cb5f0add3f7454e7a4523f9d4353a6a4a217e6fa515309612"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/code-simplification/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/code-simplification/SKILL.md"
+    sha256: "f0c5ed754057eb0c1e027e2587f59de816651feb5e837242296c43ea21cf621d"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/constraint-driven-development/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/constraint-driven-development/SKILL.md"
+    sha256: "06479d4305f286d23cfb99f5dc85695896785269664e1f6a8d800e3b71e70c10"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/constraint-driven-development/references/floor-guard.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/constraint-driven-development/references/floor-guard.md"
+    sha256: "dba15dad8f5a5cbae464ec8457e6dd014a7bcb3ad13a360a6908d54991a5415e"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/debugging-and-error-recovery/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/debugging-and-error-recovery/SKILL.md"
+    sha256: "21f3960f5d7ae2cc95c40896545004dbbcbbd752ea65fc2d53962554d4174220"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/deprecation-and-migration/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/deprecation-and-migration/SKILL.md"
+    sha256: "6a624f942e09c69863a4219b9bd5d56975026b67b0c70bc83385ffd2120b6142"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/documentation-and-adrs/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/documentation-and-adrs/SKILL.md"
+    sha256: "87ae44a0c7bb3eefc2131a9d11caabcc14e4d8dcb27d66a3a675551ee2ce1671"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/frontend-ui-engineering/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/frontend-ui-engineering/SKILL.md"
+    sha256: "549044e9bd8d7fe993ce8e5c0d2b0f5465650676dc15805329973f936179eb1e"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/idea-refine/SKILL.md"
+    sha256: "79e773058963adc7646b0115b4f8a4afc974c5ff95843e4ef1cafff3cb51899e"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/examples.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/idea-refine/examples.md"
+    sha256: "563204bfbf2f80a444151695205af4cb759e722b3d1e5460e08f278a69c89ba1"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/frameworks.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/idea-refine/frameworks.md"
+    sha256: "161ebc18fdf2d996bc62a87a2d747cf1bf53548354f8925de25c732c27f00309"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/refinement-criteria.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/idea-refine/refinement-criteria.md"
+    sha256: "1ca2973a4d01b5cb37ab7ddb2eff77fa4e792634a33d0ce44961c068fc88d51a"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/idea-refine/scripts/idea-refine.sh"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/idea-refine/scripts/idea-refine.sh"
+    sha256: "f02a52408a4218047c032d221483abfbb48d11f090bb4915965c7419bf2e0e47"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/interview-me/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/interview-me/SKILL.md"
+    sha256: "ace4b675999bb504593d572e0f73f3d7e803ad6fddf318445598c82c11939db2"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/observability-and-instrumentation/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/observability-and-instrumentation/SKILL.md"
+    sha256: "e7fcb0820306d46268de9594d676ad98e35040858926c412b7000faa52a61f87"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/performance-optimization/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/performance-optimization/SKILL.md"
+    sha256: "00694d0c69bbde674d0e39de24052d90afea32d9fef9553eaee21a50a7e9b8cf"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/source-driven-development/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/source-driven-development/SKILL.md"
+    sha256: "c59faf851377f0eeda45306398d16eb96d77ab1c2fd3e1a7fb58e9a0af33c1e9"
+  - path: "skills/upstream/addyosmani-agent-skills/skills/spec-driven-development/SKILL.md"
+    source: addyosmani-agent-skills
+    upstream_path: "skills/spec-driven-development/SKILL.md"
+    sha256: "f7129bca8742bad73f60209bd237e8b10dab6f1fae8576dc552fb1923bc1e721"
+  - path: "skills/upstream/anthropics-skills/skills/frontend-design/LICENSE.txt"
+    source: anthropics-skills
+    upstream_path: "skills/frontend-design/LICENSE.txt"
+    sha256: "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+  - path: "skills/upstream/anthropics-skills/skills/frontend-design/SKILL.md"
+    source: anthropics-skills
+    upstream_path: "skills/frontend-design/SKILL.md"
+    sha256: "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+  - path: "skills/upstream/anthropics-skills/skills/webapp-testing/SKILL.md"
+    source: anthropics-skills
+    upstream_path: "skills/webapp-testing/SKILL.md"
+    sha256: "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+  - path: "skills/upstream/anthropics-skills/skills/webapp-testing/examples/console_logging.py"
+    source: anthropics-skills
+    upstream_path: "skills/webapp-testing/examples/console_logging.py"
+    sha256: "ea46877289acb82da7e7ce59d0bc37c8977cd57e2a006d0c88d7a1c625bf95da"
+  - path: "skills/upstream/anthropics-skills/skills/webapp-testing/examples/element_discovery.py"
+    source: anthropics-skills
+    upstream_path: "skills/webapp-testing/examples/element_discovery.py"
+    sha256: "d63c89604a22f8845d724e95dda45db49b1bf57c25ce0a83afbb7b8da3d402f0"
+  - path: "skills/upstream/anthropics-skills/skills/webapp-testing/examples/static_html_automation.py"
+    source: anthropics-skills
+    upstream_path: "skills/webapp-testing/examples/static_html_automation.py"
+    sha256: "9d533aafb875ee3ab8b8ebf8f5b9003ac8d999da3d09b285cce252e623140064"
+  - path: "skills/upstream/anthropics-skills/skills/webapp-testing/scripts/with_server.py"
+    source: anthropics-skills
+    upstream_path: "skills/webapp-testing/scripts/with_server.py"
+    sha256: "b0dcf4918935b795f4eda9821579b9902119235ff4447f687a30286e7d0925fd"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/LICENSE"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/LICENSE"
+    sha256: "bc957ca6bee02792566a1a028d105e02e247c6e77cf057061674273da77b200e"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/create-verification-skill/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/create-verification-skill/SKILL.md"
+    sha256: "644f2551403c1bca01a2855b34611b6e7be0ce0dc5b204514c376c0f6a6e6ac4"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/figure-it-out/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/figure-it-out/SKILL.md"
+    sha256: "e041c64a39f1084a20e60ee99762c4dbd3ec8be56ed33fd68ea867b8bd8bd3e4"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/maintain-verification-skill/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/maintain-verification-skill/SKILL.md"
+    sha256: "515c0eaa054b3f6be1b1fb06f2c2f173c80fddb58bbcac57576f89c479bc68e8"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-boundary-discipline/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-boundary-discipline/SKILL.md"
+    sha256: "62ac2862c2caa22dd14531f51c9c6bb445ceb198ca98a687e25b4d47c1f10a28"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-encode-lessons-in-structure/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-encode-lessons-in-structure/SKILL.md"
+    sha256: "77044c83a9ac6df78fc643887ea5f1f11f082adaf14b717c060cdaed03cce863"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-fix-root-causes/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-fix-root-causes/SKILL.md"
+    sha256: "ba4cd38da1dcc8fe5432feb64457cba95594736a9b21b2ebf8f8c52aee068707"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-foundational-thinking/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-foundational-thinking/SKILL.md"
+    sha256: "864b827e8199d946ce58beca0f89c4ed4099ed6e426fb698a3aaa45de2a9eea2"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-guard-the-context-window/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-guard-the-context-window/SKILL.md"
+    sha256: "9f60e2c79b35f865cb103462f9128c6760b70f603475d1e535e5930f61840f66"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-make-operations-idempotent/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-make-operations-idempotent/SKILL.md"
+    sha256: "540738217c3da7bf513b9886924ad6a2bc77e58be867f5bd2e1831c74bf2ce70"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-minimize-reader-load/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-minimize-reader-load/SKILL.md"
+    sha256: "42551c5dc74cd578163c148da552db3ff67d29b78600ef216bfd311fb828fe69"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-model-the-domain/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-model-the-domain/SKILL.md"
+    sha256: "bbadbb9a723fac3f76e782ae45665eb94058ec10993e4bae36d4dc6b0e4eac07"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-prove-it-works/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-prove-it-works/SKILL.md"
+    sha256: "ae13d287984a5864312b6286899d4ee2b60f8272b5e5e8fcc586a7c3ea51020b"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-test-behavior-not-implementation/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-test-behavior-not-implementation/SKILL.md"
+    sha256: "87e40efe4e486f7ea639d2ed1fc0abe6c93b8fd0e89a81218086909d2470a52e"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-type-system-discipline/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/principle-type-system-discipline/SKILL.md"
+    sha256: "c83da8031ffb4c86410030d3e261f659598fca2b7d8158fd9dc269d70a3a025e"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/show-me-your-work/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/show-me-your-work/SKILL.md"
+    sha256: "831e85ba3f84f38bf338cd03e6af050fea357752e25a825e334c99f59d7f2077"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/show-me-your-work/references/decision-log-template.tsv"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/show-me-your-work/references/decision-log-template.tsv"
+    sha256: "6779378006a2f5225e8c06deb84f1d913fb532041ebbb6e50d94600bfe3f4b76"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/show-me-your-work/scripts/log.sh"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/show-me-your-work/scripts/log.sh"
+    sha256: "1601bc18f9aba0af3f5d6375e4f2d5dc6102334d1bca935026c0e3547cdadbbf"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/tdd/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/tdd/SKILL.md"
+    sha256: "011cab0ecc04a3632121efb493ae4d60aa282a9b72c66de74dd8ad7e4313e05a"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/technical-writing/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/technical-writing/SKILL.md"
+    sha256: "6d6d9e625ae412ee8f36df8deb6fd9203d7c6acca776d5ee3cabbb9126f8b84c"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/typescript-best-practices/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/typescript-best-practices/SKILL.md"
+    sha256: "28f9e61710e205f6f3c5476f333483cff0e988f6a5b639e2faad536344b40c5e"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/typescript-best-practices/references/patterns.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/typescript-best-practices/references/patterns.md"
+    sha256: "62e9cd32d2fa066a35d0d1349aac22dce31a48ad7d5eaf142570770cfe707384"
+  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/unslop/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: "pstack/skills/unslop/SKILL.md"
+    sha256: "c6d2572294d933a428211921069e9a248490e9b466ca59437cb4d9de248600ca"
+  - path: "skills/upstream/cursor-plugins-thermos/thermos/LICENSE"
+    source: cursor-plugins-thermos
+    upstream_path: "thermos/LICENSE"
+    sha256: "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0"
+  - path: "skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-code-quality-review/SKILL.md"
+    source: cursor-plugins-thermos
+    upstream_path: "thermos/skills/thermo-nuclear-code-quality-review/SKILL.md"
+    sha256: "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f"
+  - path: "skills/upstream/cursor-plugins-thermos/thermos/skills/thermo-nuclear-review/SKILL.md"
+    source: cursor-plugins-thermos
+    upstream_path: "thermos/skills/thermo-nuclear-review/SKILL.md"
+    sha256: "5091011c4490932d40658ae958fb55b9aaca8e2bba5196860295ab945180e434"
+  - path: "skills/upstream/hyhmrright-brooks-lint/LICENSE"
+    source: hyhmrright-brooks-lint
+    upstream_path: "LICENSE"
+    sha256: "a5213d3fb5a350abbd283067fabd664cc2f970dc59c5d3f583928a39ce13a6e1"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/common.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/common.md"
+    sha256: "239f4aa636686a100e4e62385a7b0ed564789991640bba421c1f540347791fb4"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/custom-risks-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/custom-risks-guide.md"
+    sha256: "73dc58eb41fc44fd281650b1b0e80b7d2d59f2b1422aea6da2cb8f117c07c1a0"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/decay-risks.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/decay-risks.md"
+    sha256: "34b06a211c673ebb7072c27975c7e59d430234d3eadf9fafa7038e417860f013"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/remedy-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/remedy-guide.md"
+    sha256: "576062915418ebb1e2935ae33986c2e8f1caff8cebdbd704d4f5d87c47abbaf9"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/source-coverage.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/source-coverage.md"
+    sha256: "e3f9aadc17db20be17e89467f65aed91dbc1d3b17cd4896ad356b5963368820c"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/_shared/test-decay-risks.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/_shared/test-decay-risks.md"
+    sha256: "2d293675d0dd56b9b7ab43cf08533b2b1e927066056bca726ffbc6b3d300415e"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-audit/SKILL.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-audit/SKILL.md"
+    sha256: "ba71c1211d12e66b9180a6cd7f28509566c818a803b93667b8dff0a28200a706"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-audit/architecture-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-audit/architecture-guide.md"
+    sha256: "256ea669eb7433d54ac6a5d18271c01e1b75f7e9eae18274d64636e9372a2f52"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-audit/onboarding-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-audit/onboarding-guide.md"
+    sha256: "167e50f6429b5757ad67bdc6e1a4bcc34fdc59a98e3be015b64eef1e76b3fe19"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-debt/SKILL.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-debt/SKILL.md"
+    sha256: "8ee2164c75fe5f82ea6cd64ff62c32712c4d8d8539a4cba6620bd9a90b087151"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-debt/debt-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-debt/debt-guide.md"
+    sha256: "d539b3cf93438f330acd533b23dfe3f20e33d51172f4b5c3f52a86549469f104"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-health/SKILL.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-health/SKILL.md"
+    sha256: "aee85b300826390a681da03c74cfbc80e96e28a9f5f6c47f6f6ea27bcda65d15"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-health/health-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-health/health-guide.md"
+    sha256: "2918b0e136384c518a75ee961780904c75670cef7cd7b7f04ba6a158f59f0f92"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-review/SKILL.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-review/SKILL.md"
+    sha256: "e98b77fbb618109c9e74219721f1c1ca7a4b2ce60edbff40e850ea89e1c27b9e"
+  - path: "skills/upstream/hyhmrright-brooks-lint/skills/brooks-review/pr-review-guide.md"
+    source: hyhmrright-brooks-lint
+    upstream_path: "skills/brooks-review/pr-review-guide.md"
+    sha256: "cda0f328189b234c5483dbc445319b5313854deb88b0c0747c9c3b6ef86977ee"
+  - path: "skills/upstream/mattpocock-skills/LICENSE"
+    source: mattpocock-skills
+    upstream_path: "LICENSE"
+    sha256: "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/codebase-design/DEEPENING.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/codebase-design/DEEPENING.md"
+    sha256: "f3dd099ce99289bd213914d8ee3e2429b78309c3957ca4583f7659551b1d53c1"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/codebase-design/DESIGN-IT-TWICE.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/codebase-design/DESIGN-IT-TWICE.md"
+    sha256: "8e740bf98446dbd4dfdc132ac4346d9a7eedaf93de6a495889171cf7f99f16bd"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/codebase-design/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/codebase-design/SKILL.md"
+    sha256: "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/diagnosing-bugs/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/diagnosing-bugs/SKILL.md"
+    sha256: "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/diagnosing-bugs/scripts/hitl-loop.template.sh"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/diagnosing-bugs/scripts/hitl-loop.template.sh"
+    sha256: "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/domain-modeling/ADR-FORMAT.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/domain-modeling/ADR-FORMAT.md"
+    sha256: "944c92aa790e8fbdc9199640b170979abb8a34ba8d0fe18c2a01a63bce140ca0"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/domain-modeling/CONTEXT-FORMAT.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/domain-modeling/CONTEXT-FORMAT.md"
+    sha256: "17ab16ce783e4d2801ee52fd9acdf550cbf44de65ae76797a93943bbedf22a13"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/domain-modeling/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/domain-modeling/SKILL.md"
+    sha256: "327a2b50620e2fd70abc6893cd6965e76b20f8d0adb0dc2c8d5eb3845efb643e"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/improve-codebase-architecture/HTML-REPORT.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/improve-codebase-architecture/HTML-REPORT.md"
+    sha256: "581e8bb5a521e46bbda8ca7e19b15948bed882187108092ebb90c62513b77528"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/improve-codebase-architecture/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/improve-codebase-architecture/SKILL.md"
+    sha256: "d1ac25511a936ff4250a48dbcefda363837d6bb9321b3cba73df99fa37270a75"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/prototype/LOGIC.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/prototype/LOGIC.md"
+    sha256: "f61c7d249e786a79ef289018901c348271e1798dd0b0bc5607b5c6f4d4a01ab9"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/prototype/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/prototype/SKILL.md"
+    sha256: "714de632d116bb73f65cdb5a882db15b9369a6713b9a47c0fad827848f0bfbe3"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/prototype/UI.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/prototype/UI.md"
+    sha256: "723211e878acbc7b6ff09755263f3295cde724ba902ff0064da41eed51d45ad3"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/research/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/research/SKILL.md"
+    sha256: "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4"
+  - path: "skills/upstream/mattpocock-skills/skills/engineering/resolving-merge-conflicts/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/engineering/resolving-merge-conflicts/SKILL.md"
+    sha256: "9d8114f8ef0b31f535a265fc05c364bd8cf2e2895a830040e06c22acb11f54b0"
+  - path: "skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/productivity/grilling/SKILL.md"
+    sha256: "10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2"
+  - path: "skills/upstream/mattpocock-skills/skills/productivity/handoff/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/productivity/handoff/SKILL.md"
+    sha256: "7c62de979fdc7ac32fb5ddb2146156c917f80ee070d30fadc9d40343c4b6ed25"
+  - path: "skills/upstream/mattpocock-skills/skills/productivity/writing-for-agents/SKILL-MECHANICS.md"
+    source: mattpocock-skills
+    upstream_path: "skills/productivity/writing-for-agents/SKILL-MECHANICS.md"
+    sha256: "c768e6307c7c10728c401c213f2c4ba71c542127eeb7ad2956aabd15a0fa0059"
+  - path: "skills/upstream/mattpocock-skills/skills/productivity/writing-for-agents/SKILL.md"
+    source: mattpocock-skills
+    upstream_path: "skills/productivity/writing-for-agents/SKILL.md"
+    sha256: "551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a"
+  - path: "skills/upstream/obra-superpowers/LICENSE"
+    source: obra-superpowers
+    upstream_path: "LICENSE"
+    sha256: "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+  - path: "skills/upstream/obra-superpowers/skills/brainstorming/SKILL.md"
+    source: obra-superpowers
+    upstream_path: "skills/brainstorming/SKILL.md"
+    sha256: "a32d2255354775aa124855aa7100cf276bea096fff4ebb3a0edf57be216e6c72"
+  - path: "skills/upstream/obra-superpowers/skills/receiving-code-review/SKILL.md"
+    source: obra-superpowers
+    upstream_path: "skills/receiving-code-review/SKILL.md"
+    sha256: "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438"
+  - path: "skills/upstream/obra-superpowers/skills/requesting-code-review/SKILL.md"
+    source: obra-superpowers
+    upstream_path: "skills/requesting-code-review/SKILL.md"
+    sha256: "cfcee1b06774e7c0517f1e09be1a11f2d5680257072723e709ddbcf7e08b795a"
+  - path: "skills/upstream/obra-superpowers/skills/requesting-code-review/code-reviewer.md"
+    source: obra-superpowers
+    upstream_path: "skills/requesting-code-review/code-reviewer.md"
+    sha256: "82e370be6b3447523816286195571e4216ba56ba1ad6ad0e87862294c4c78dcb"
+  - path: "skills/upstream/obra-superpowers/skills/writing-plans/SKILL.md"
+    source: obra-superpowers
+    upstream_path: "skills/writing-plans/SKILL.md"
+    sha256: "0bc3d36590f7b2c323ed3ec18ff77e9f8ed57af42f5680a02b11a2d20de265cf"
+  - path: "skills/upstream/supabase-agent-skills/LICENSE"
+    source: supabase-agent-skills
+    upstream_path: "LICENSE"
+    sha256: "b65e575eb4f04a13c187d64e958321298e2ab84d67aa8428819f362056ba292c"
+  - path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/SKILL.md"
+    source: supabase-agent-skills
+    upstream_path: "skills/supabase-postgres-best-practices/SKILL.md"
+    sha256: "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855"
+  - path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/references/_sections.md"
+    source: supabase-agent-skills
+    upstream_path: "skills/supabase-postgres-best-practices/references/_sections.md"
+    sha256: "c9e992612b422c7122de0b7542ebc2450db283edaab08cfe86c6d657fcccccd5"
+  - path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/references/query-missing-indexes.md"
+    source: supabase-agent-skills
+    upstream_path: "skills/supabase-postgres-best-practices/references/query-missing-indexes.md"
+    sha256: "91ad8b0ff4365704b4830a7f077c6f140f7140fd5d3ce5cd0b92b160cf9e25f1"
+  - path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/references/query-partial-indexes.md"
+    source: supabase-agent-skills
+    upstream_path: "skills/supabase-postgres-best-practices/references/query-partial-indexes.md"
+    sha256: "6448982bc8558c6555284958edc331b29239c6a0130e6b4501dd6d4da607a6dd"

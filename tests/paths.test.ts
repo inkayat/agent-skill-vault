@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { cachePath } from "../bin/lib/catalog.ts";
-import { loadCatalog } from "./helpers.ts";
+import { loadCatalog, repoRoot } from "./helpers.ts";
 
 describe("exact paths and commits (spot-checked against audited evidence)", () => {
-  test("pstack:blast-radius resolves to the exact audited upstream path and a real local vault_path", async () => {
+  test("pstack:blast-radius keeps its audited upstream provenance while resolving to the adaptation", async () => {
     const catalog = await loadCatalog();
     const entry = catalog.entries.find((e) => e.id === "pstack:blast-radius");
     expect(entry).toBeTruthy();
-    expect(entry?.upstream_path).toBe("pstack/skills/blast-radius/SKILL.md");
-    expect(entry?.vault_path).toBe("skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md");
+    expect(entry?.upstream_path).toBe("pstack/skills/blast-radius/SKILL.md"); // provenance: where it came from
+    expect(entry?.vault_path).toBe("skills/adapted/pstack/blast-radius/SKILL.md"); // what is actually read
     expect(cachePath(entry!)).toBe(entry?.vault_path);
   });
 
@@ -20,28 +20,38 @@ describe("exact paths and commits (spot-checked against audited evidence)", () =
     expect(entry?.vault_path).toBeNull(); // reference-only: metadata-only, never a worker path
   });
 
-  test("mattpocock:grill-me and grill-with-docs are router stubs; the real target is mattpocock:grilling", async () => {
+  test("the grill-me/grill-with-docs router stubs are gone; mattpocock:grilling is the real Captain-scope skill", async () => {
     const catalog = await loadCatalog();
-    const grillMe = catalog.entries.find((e) => e.id === "mattpocock:grill-me");
-    const grillWithDocs = catalog.entries.find((e) => e.id === "mattpocock:grill-with-docs");
+    for (const id of ["mattpocock:grill-me", "mattpocock:grill-with-docs"]) {
+      expect(catalog.entries.find((e) => e.id === id), `${id} was a two-line router stub aliasing grilling`).toBeUndefined();
+    }
     const grilling = catalog.entries.find((e) => e.id === "mattpocock:grilling");
-    expect(grillMe?.upstream_path).toBe("skills/productivity/grill-me/SKILL.md");
-    expect(grillWithDocs?.upstream_path).toBe("skills/engineering/grill-with-docs/SKILL.md");
-    expect(grilling, "grilling addition must exist").toBeTruthy();
+    expect(grilling?.status).toBe("reference-only");
+    expect(grilling?.scope).toBe("captain");
     expect(grilling?.upstream_path).toBe("skills/productivity/grilling/SKILL.md");
+    expect(grilling?.vault_path).toBe("skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md");
   });
 
-  test("the three delegated-stronger-alternative additions are present with a real local body", async () => {
+  test("the retained delegated-research addition keeps a real local body; the ones cut in hardening are fully gone", async () => {
     const catalog = await loadCatalog();
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
     const tdd = catalog.entries.find((e) => e.id === "pstack:tdd");
-    const attackThePremise = catalog.entries.find((e) => e.id === "pstack:principle-attack-the-premise");
-    const grilling = catalog.entries.find((e) => e.id === "mattpocock:grilling");
     expect(tdd?.upstream_path).toBe("pstack/skills/tdd/SKILL.md");
     expect(tdd?.vault_path).toBe("skills/upstream/cursor-plugins-pstack/pstack/skills/tdd/SKILL.md");
-    expect(attackThePremise?.upstream_path).toBe("pstack/skills/principle-attack-the-premise/SKILL.md");
-    expect(attackThePremise?.activation).toBe("auto-candidate");
-    expect(grilling?.status).toBe("reference-only"); // captain-scope, never picked by category/auto
-    expect(grilling?.vault_path).toBe("skills/upstream/mattpocock-skills/skills/productivity/grilling/SKILL.md");
+    expect(inventory.has(tdd!.vault_path!)).toBe(true);
+
+    // attack-the-premise dragged three unvendored sibling principles; subtract-before-you-add
+    // restated Ponytail. Both rows and both bodies were removed, not merely demoted.
+    for (const id of ["pstack:principle-attack-the-premise", "pstack:principle-subtract-before-you-add"]) {
+      expect(catalog.entries.find((e) => e.id === id), id).toBeUndefined();
+    }
+    for (const path of [
+      "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-attack-the-premise/SKILL.md",
+      "skills/upstream/cursor-plugins-pstack/pstack/skills/principle-subtract-before-you-add/SKILL.md",
+    ]) {
+      expect(inventory.has(path), path).toBe(false);
+      expect(await Bun.file(`${repoRoot()}${path}`).exists(), path).toBe(false);
+    }
   });
 
   test("mattpocock:code-review is a real adapted derivative, not the unmodified upstream path", async () => {
