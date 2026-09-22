@@ -354,6 +354,38 @@ changed, all recorded per-entry in `catalog.yaml`'s `notes`:
   `thermos/LICENSE`, `skills/frontend-design/LICENSE.txt`) and were relocated,
   which the inventory's pin check now catches by construction.
 
+### Second review pass
+
+A follow-up review found four honesty gaps in the first pass; all four are fixed
+above the line, not annotated away:
+
+- **`pstack:blast-radius` was not self-contained.** The vault's flagship review
+  auto-candidate opened "companion to `how` and `why`", took its PR context from
+  "`why` step 2", and ended in an `arena` pass -- all three now inert here, so a
+  worker following it hit dead ends. It is now served by
+  `skills/adapted/pstack/blast-radius/SKILL.md`: the same method, with the
+  direct `git log`/`git blame`/`git show`/`gh pr view` commands step 1 actually
+  meant, `why`'s evidence rules stated inline, and the multi-model arena replaced
+  by a second independent pass. `tests/selectable-safety.test.ts` now fails on
+  *any* selectable body that hands off to a row no one can open.
+- **The Brooks sibling notes were false.** `brooks-review`/`audit`/`debt`/`health`
+  shared one copy-pasted note calling them a "read-only report generator", while
+  their shared `_shared/common.md` reads `.brooks-lint.yaml`, appends
+  `.brooks-lint-history.json` and writes suppressions. Each row now says what it
+  is and names the steps a reader must skip; a test enforces that disclosure.
+- **The Supabase row was hollow.** Its body is an index over a 34-file rule set
+  of which three files are vendored, so it is `reference-only` now, with the note
+  naming exactly what is local.
+- **The Brooks acceptance test over-claimed.** It rendered a hand-written
+  simulacrum of a review and called the result proof. The simulacrum is gone: the
+  test now checks the body's static content contract and executes every shell
+  command the body prescribes against a disposable Git project that must stay
+  byte-identical. No test executes a review, and a test now fails if a doc says
+  one does.
+
+The captain accepted the `pstack:how` retirement from the first pass: it stays
+`restricted`, with no local body.
+
 ## Testing
 
 ```console
@@ -368,8 +400,11 @@ error (a stale/broken pin) is always a hard failure.
 vendored body resolves to another inventory row (see that file's header for the
 one recorded, checked exception and the honest scope of the check).
 `tests/selectable-safety.test.ts` pins the audited unsafe entries out of the
-selectable surface. `tests/brooks-adaptation.test.ts` runs the adapted review
-over a disposable Git project and proves it leaves nothing behind.
+selectable surface. `tests/brooks-adaptation.test.ts` checks the adapted Brooks
+body's static content contract and executes every shell command that body
+prescribes in a disposable Git project, which must be byte-identical
+afterwards. No test executes the review itself -- a skill body is a prompt an
+agent performs, and nothing here pretends to reproduce that.
 
 ## What this repo deliberately does not do
 

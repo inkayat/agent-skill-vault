@@ -169,12 +169,12 @@ describe("renderIdRow (--id notes column)", () => {
     };
   }
 
-  test("pstack:blast-radius exposes the 'skip the arena step' caveat as the final field", async () => {
+  test("pstack:blast-radius exposes its adaptation caveat as the final field", async () => {
     const catalog = await loadCatalog();
     const entry = lookupById(catalog, "pstack:blast-radius")!;
     const columns = renderIdRow(entry).split("\t");
     expect(columns.length).toBe(9);
-    expect(columns[8]).toContain("skip the arena step");
+    expect(columns[8]).toContain("self-contained adaptation");
   });
 
   test("brooks:brooks-test exposes its adaptation caveat as the final field", async () => {

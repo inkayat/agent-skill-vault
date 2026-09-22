@@ -83,6 +83,32 @@ describe("worker-selectable surface: orchestration and host safety", () => {
     }
   });
 
+  test("no selectable body hands the reader off to a vault entry that can never be picked", async () => {
+    const catalog = await loadCatalog();
+    // A selectable skill that says "use `arena`" or "see `why` step 2" is not self-contained:
+    // those rows are restricted/team-only/catalog, so the reader has no body to go to.
+    const inertNames = new Set(
+      catalog.entries
+        .filter((e) => ["restricted", "team-only", "catalog"].includes(e.status))
+        .map((e) => e.upstream_path?.split("/").filter(Boolean).slice(-2)[0])
+        .filter((n): n is string => Boolean(n)),
+    );
+    expect(inertNames.size).toBeGreaterThan(0);
+
+    const danglingHandoffs: string[] = [];
+    for (const [id, files] of await selectableClosure()) {
+      for (const path of files) {
+        // An adaptation's Source/Modifications header documents what it REMOVED, so it may
+        // name inert entries. Only the instruction body below it is what a reader follows.
+        const body = (await Bun.file(`${repoRoot()}${path}`).text()).replace(/^<!--[\s\S]*?-->\n/, "");
+        for (const name of inertNames) {
+          if (body.includes(`\`${name}\``)) danglingHandoffs.push(`${id}: ${path} -> \`${name}\``);
+        }
+      }
+    }
+    expect(danglingHandoffs).toEqual([]);
+  });
+
   test("the marker check covers explicit picks too, not only auto-candidates", async () => {
     const catalog = await loadCatalog();
     const explicitSelectable = catalog.entries.filter((e) => e.status === "firstmate_candidate" && !isCandidate(e));

@@ -52,11 +52,25 @@ unmodified original.
   trend append, Post-Report Triage's `suppress:` writes, Remedy Mode's `--fix`
   editing path, and the `brooks-sweep` pipeline hand-off -- plus the
   interactive triage loop. The result is one self-contained, read-only file
-  instead of a five-file read chain. `tests/brooks-adaptation.test.ts` runs a
-  review over a disposable Git project and proves the project is byte-identical
-  afterwards (`git status --porcelain` empty, no `.brooks-lint*` artifact).
+  instead of a five-file read chain. `tests/brooks-adaptation.test.ts` checks
+  that static contract and runs every shell command the body prescribes in a
+  disposable Git project, which stays byte-identical (`git status --porcelain`
+  empty, no `.brooks-lint*` artifact); it does not execute the review, which an
+  agent performs from the prompt.
   The upstream `brooks-test` snapshot is deliberately not vendored: provenance
   is the `Source:` header and the pinned commit.
+- **`pstack/blast-radius/SKILL.md`** -- adapted from
+  `cursor/plugins@6ed0f7a9504f577d7529064103cecce9be7dfc5e:pstack/skills/blast-radius/SKILL.md`.
+  The method is unchanged (find the breakage grep misses, name the one fact the
+  change is safe because of, prove it by running real code against the
+  how-sure-are-you ladder). Removed: every hand-off to a row a worker cannot
+  open here -- the "companion to `how` and `why`" framing, step 1's "use `why`
+  step 2" for PR context (now the direct `git log`/`git blame`/`git show`/
+  `gh pr view` commands), step 4's "same rules as `why`" (those evidence rules
+  are stated inline), and step 6's multi-model `arena` pass (now a second
+  independent pass by the same reviewer). This is the vault's only
+  `auto-candidate` adaptation, so it is also the one most worth re-reading on a
+  pin bump.
 
 Everything else in this vault's `auto-candidate` set passed the five-check
 eligibility gate (`FORBIDDEN_MARKERS` in `bin/lib/catalog.ts`, plus the 24KB

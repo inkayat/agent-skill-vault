@@ -3,12 +3,12 @@ import { cachePath } from "../bin/lib/catalog.ts";
 import { loadCatalog, repoRoot } from "./helpers.ts";
 
 describe("exact paths and commits (spot-checked against audited evidence)", () => {
-  test("pstack:blast-radius resolves to the exact audited upstream path and a real local vault_path", async () => {
+  test("pstack:blast-radius keeps its audited upstream provenance while resolving to the adaptation", async () => {
     const catalog = await loadCatalog();
     const entry = catalog.entries.find((e) => e.id === "pstack:blast-radius");
     expect(entry).toBeTruthy();
-    expect(entry?.upstream_path).toBe("pstack/skills/blast-radius/SKILL.md");
-    expect(entry?.vault_path).toBe("skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md");
+    expect(entry?.upstream_path).toBe("pstack/skills/blast-radius/SKILL.md"); // provenance: where it came from
+    expect(entry?.vault_path).toBe("skills/adapted/pstack/blast-radius/SKILL.md"); // what is actually read
     expect(cachePath(entry!)).toBe(entry?.vault_path);
   });
 

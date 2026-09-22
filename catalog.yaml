@@ -513,7 +513,7 @@ entries:
     scope: worker
     categories: []
     cluster: "architecture"
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Architecture-audit mode (architecture-guide.md + onboarding-guide.md): whole-project module/dependency review. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. Overlaps the installed architecture-review; kept for its book-cited decay vocabulary, not as a second default."
   - id: "brooks:brooks-debt"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-debt/SKILL.md"
@@ -523,7 +523,7 @@ entries:
     scope: worker
     categories: []
     cluster: "implement"
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Tech-debt assessment mode (debt-guide.md): ranks existing debt by decay risk and remediation cost. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection."
   - id: "brooks:brooks-health"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-health/SKILL.md"
@@ -533,7 +533,7 @@ entries:
     scope: worker
     categories: []
     cluster: "review"
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "Health-dashboard mode (health-guide.md): whole-project score across the production and test decay risks. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. Its score is a report artifact only -- nothing here tracks it over time, because the history mechanism that would is exactly what must be skipped."
   - id: "brooks:brooks-review"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-review/SKILL.md"
@@ -543,7 +543,7 @@ entries:
     scope: worker
     categories: []
     cluster: "review"
-    notes: "35-45KB including skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, required by every brooks-* skill. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found), read-only report generator. Cost disqualifies auto-candidate: one invocation is ~4x the largest candidate body. Never vault a single skill dir without the whole repo (the _shared/ parent). Vendored locally (real vault_path); explicit-id/captain reference only, never category/auto selection."
+    notes: "PR-review mode of Brooks Lint (pr-review-guide.md): diff-scoped decay review against the six production risks. Reading it means skipping upstream's project-mutating steps by hand: _shared/common.md's Project Config (reads .brooks-lint.yaml), History Tracking (appends .brooks-lint-history.json in the project root) and Post-Report Triage (writes suppress: entries back into .brooks-lint.yaml), plus Remedy Mode's --fix path. Clean MIT, original synthesis with citations (3 quotation marks total in decay-risks.md; no reproduced book text found). Needs skills/_shared/{common,decay-risks,test-decay-risks,source-coverage,remedy-guide,custom-risks-guide}.md, all vendored. Explicit-id/captain reference only, never category/auto selection. For an unattended worker, the adapted brooks:brooks-test is the only Brooks entry point with those steps already removed."
   - id: "brooks:brooks-sweep"
     source: hyhmrright-brooks-lint
     upstream_path: "skills/brooks-sweep/SKILL.md"
@@ -563,7 +563,7 @@ entries:
     scope: worker
     categories: []
     cluster: "tdd"
-    notes: "Explicit test-quality specialist, served by the FirstMate-safe adaptation at skills/adapted/brooks/brooks-test/SKILL.md: one self-contained file carrying the Iron Law, T1-T6 with their book sources, the scan order and the report template, with upstream's .brooks-lint.yaml config load, .brooks-lint-history.json append, suppression writes, interactive triage and --fix path removed. Upstream snapshot deliberately not vendored: provenance is the Source header (hyhmrright/brooks-lint@220fe716...:skills/brooks-test/SKILL.md) and tests/brooks-adaptation.test.ts proves a review leaves a disposable project byte-identical."
+    notes: "Explicit test-quality specialist, served by the FirstMate-safe adaptation at skills/adapted/brooks/brooks-test/SKILL.md: one self-contained file carrying the Iron Law, T1-T6 with their book sources, the scan order and the report template, with upstream's .brooks-lint.yaml config load, .brooks-lint-history.json append, suppression writes, interactive triage and --fix path removed. Upstream snapshot deliberately not vendored: provenance is the Source header (hyhmrright/brooks-lint@220fe716...:skills/brooks-test/SKILL.md). tests/brooks-adaptation.test.ts checks the body's static content contract and executes every command it prescribes against a disposable Git project that must stay byte-identical; no test executes the review itself."
   - id: "discovery:agentic-awesome-skills"
     source: sickn33-agentic-awesome-skills
     upstream_path: null
@@ -598,12 +598,12 @@ entries:
     source: supabase-agent-skills
     upstream_path: "skills/supabase-postgres-best-practices/SKILL.md"
     vault_path: "skills/upstream/supabase-agent-skills/skills/supabase-postgres-best-practices/SKILL.md"
-    status: firstmate_candidate
-    activation: explicit
+    status: reference-only
+    activation: never
     scope: worker
     categories: ["IMPLEMENT"]
     cluster: "implement"
-    notes: "MIT, clean provenance, but project-specific (Postgres/Supabase projects only); a project-local skill in the relevant repo would outrank this vault row anyway."
+    notes: "Index, not a guide: the body is a category table plus 'read individual rule files', and the rules live in references/ -- 34 files upstream, of which exactly three are vendored here (query-missing-indexes.md, query-partial-indexes.md, and _sections.md, the category definitions). Demoted from firstmate_candidate/explicit in the post-merge hardening pass: handing a worker an index over 31 files it cannot open is worse than handing it nothing. Explicit-id reference only; a project-local Postgres skill, or the two vendored query rules read directly, outranks it."
   - id: "discovery:web-design-guidelines"
     source: vercel-labs-agent-skills
     upstream_path: null
@@ -937,13 +937,13 @@ entries:
   - id: "pstack:blast-radius"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/blast-radius/SKILL.md"
-    vault_path: "skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md"
+    vault_path: "skills/adapted/pstack/blast-radius/SKILL.md"
     status: firstmate_candidate
     activation: auto-candidate
     scope: worker
     categories: ["REVIEW", "DEEP"]
     cluster: "review"
-    notes: "Prove the one safety fact by running code. Note: skip the arena step."
+    notes: "Prove the one safety fact by running code. Served by the self-contained adaptation at skills/adapted/pstack/blast-radius/SKILL.md: upstream's hand-offs to `how`/`why`/`arena` (all inert here) are replaced with the direct git log/git blame/git show/gh pr view commands step 1 meant, the evidence rules `why` held are stated inline, and the multi-model arena pass became a second independent pass by the same reviewer."
   - id: "pstack:create-verification-skill"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/create-verification-skill/SKILL.md"
@@ -1417,6 +1417,10 @@ vendored:
     source: mattpocock-skills
     upstream_path: null
     sha256: "83f8a322e37864b039b49a68c52f6d526c5db3fc68c86637b5c89deb72ab8e51"
+  - path: "skills/adapted/pstack/blast-radius/SKILL.md"
+    source: cursor-plugins-pstack
+    upstream_path: null
+    sha256: "911fdf31b162cf1ba30cf4f4679b65782cc8e62060d2485e0a54900953be4fc5"
   - path: "skills/upstream/addyosmani-agent-skills/LICENSE"
     source: addyosmani-agent-skills
     upstream_path: "LICENSE"
@@ -1549,10 +1553,6 @@ vendored:
     source: cursor-plugins-pstack
     upstream_path: "pstack/LICENSE"
     sha256: "bc957ca6bee02792566a1a028d105e02e247c6e77cf057061674273da77b200e"
-  - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/blast-radius/SKILL.md"
-    source: cursor-plugins-pstack
-    upstream_path: "pstack/skills/blast-radius/SKILL.md"
-    sha256: "20cb2945f5fe62055166f745107274af5f19428ca033e53a9b8bc69650d3ded1"
   - path: "skills/upstream/cursor-plugins-pstack/pstack/skills/create-verification-skill/SKILL.md"
     source: cursor-plugins-pstack
     upstream_path: "pstack/skills/create-verification-skill/SKILL.md"

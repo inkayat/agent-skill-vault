@@ -5,60 +5,26 @@ import { join } from "node:path";
 import { loadCatalog, repoRoot } from "./helpers.ts";
 
 /**
- * Acceptance test for the FirstMate-safe Brooks test-quality adaptation.
+ * Contract tests for the FirstMate-safe Brooks test-quality adaptation.
  *
- * A real disposable Git project is created, seeded with a deliberately decayed test suite,
- * and reviewed by the deterministic fixture-level equivalent of the adapted skill: the
- * numeric rules the skill states in its own text (mock count, assertion messages, pyramid
- * shape) are applied and rendered through the skill's own report template. The harness is
- * pinned to the skill body -- every threshold and risk code it uses must appear verbatim in
- * skills/adapted/brooks/brooks-test/SKILL.md -- so the two cannot drift apart silently.
+ * A skill body is a prompt: an agent performs the review, so nothing here can execute it, and
+ * no test in this repo may imply otherwise. What IS checkable, and is checked here:
  *
- * Then the important half: the project must be byte-identical afterwards. `git status
- * --porcelain` empty, no `.brooks-lint*` artifact, no report file written anywhere.
+ * 1. Static contract -- the body still carries the diagnostic content a reviewer needs
+ *    (every risk with symptoms, a book citation, a severity guide and a "do not flag" guard)
+ *    and the concrete output contract (report template, health score arithmetic).
+ * 2. Command safety, executed for real -- every shell command the body tells the reviewer to
+ *    run is extracted from the body itself and run in a disposable Git project; the project
+ *    must be byte-identical afterwards, with no `.brooks-lint*` or report artifact. This
+ *    catches a future edit that reintroduces a mutating step, which is the actual risk.
+ *
+ * It does NOT claim to reproduce a review or to prove the findings an agent would emit.
  */
 
 const ADAPTED = "skills/adapted/brooks/brooks-test/SKILL.md";
-
-interface Finding {
-  risk: string;
-  severity: "Critical" | "Warning" | "Suggestion";
-  title: string;
-  symptom: string;
-  source: string;
-  consequence: string;
-  remedy: string;
-}
+const RISKS = ["T1 Test Obscurity", "T2 Test Brittleness", "T3 Test Duplication", "T4 Mock Abuse", "T5 Coverage Illusion", "T6 Architecture Mismatch"];
 
 let project = "";
-
-const DECAYED_UNIT_TEST = `import { expect, test } from "bun:test";
-import { createOrder } from "./order";
-
-test("test1", () => {
-  const repo = mockRepo();
-  const pricing = mockPricing();
-  const tax = mockTax();
-  const audit = mockAudit();
-  const mailer = mockMailer();
-  createOrder({ repo, pricing, tax, audit, mailer });
-  expect(repo.save).toHaveBeenCalledWith({ id: 1 });
-  expect(pricing.quote).toHaveBeenCalled();
-  expect(audit.write).toHaveBeenCalled();
-});
-
-test("shouldWork", () => {
-  const repo = mockRepo();
-  expect(createOrder({ repo })).toBeTruthy();
-  expect(repo.save).toHaveBeenCalled();
-});
-`;
-
-const E2E_TEST = `import { test, expect } from "bun:test";
-test("checkout flow end to end", async () => {
-  expect(await checkout()).toBe("ok");
-});
-`;
 
 async function git(args: string[], cwd = project): Promise<string> {
   const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
@@ -68,100 +34,18 @@ async function git(args: string[], cwd = project): Promise<string> {
   return out;
 }
 
-/** The skill's Step 1/2b/4 rules, applied mechanically to the fixture. Read-only by construction. */
-async function review(root: string): Promise<{ report: string; findings: Finding[]; map: string }> {
-  const glob = new Bun.Glob("**/*.test.ts");
-  const testFiles: string[] = [];
-  for await (const f of glob.scan({ cwd: root, onlyFiles: true })) testFiles.push(f);
-  testFiles.sort();
-
-  const unit = testFiles.filter((f) => !f.includes("e2e"));
-  const e2e = testFiles.filter((f) => f.includes("e2e"));
-  const findings: Finding[] = [];
-
-  for (const file of testFiles) {
-    const text = await Bun.file(join(root, file)).text();
-    const tests = [...text.matchAll(/\btest\(\s*"([^"]+)"/g)].map((m) => m[1]);
-    const mocks = [...text.matchAll(/\bmock[A-Z]\w*\(/g)].length;
-    const vagueNames = tests.filter((t) => /^(test\d*|shouldWork|testLogin)$/.test(t));
-    const mockAssertions = [...text.matchAll(/expect\([^)]*\)\.toHaveBeenCalled/g)].length;
-    const messagedAssertions = [...text.matchAll(/expect\([^)]*,\s*["'`]/g)].length;
-
-    if (vagueNames.length > 0) {
-      findings.push({
-        risk: "T1 Test Obscurity",
-        severity: "Warning",
-        title: `${file}: test names do not express scenario or expected outcome`,
-        symptom: `${vagueNames.length} of ${tests.length} test names are non-descriptive (${vagueNames.join(", ")}), and ${messagedAssertions} assertions carry a message string`,
-        source: "Osherove - The Art of Unit Testing (method_scenario_expected naming); Meszaros - xUnit Test Patterns, Assertion Roulette (p.224)",
-        consequence: "a failure does not say which behavior broke, so the suite is read as noise and eventually ignored",
-        remedy: "rename each test to subject + scenario + expected outcome, and give multi-assertion tests message strings",
-      });
-    }
-    if (mocks > 3) {
-      findings.push({
-        risk: "T4 Mock Abuse",
-        severity: "Warning",
-        title: `${file}: more than 3 mocks in a single unit test`,
-        symptom: `${mocks} mock objects constructed, and ${mockAssertions} of the assertions verify a mock call rather than an output or state change`,
-        source: "Osherove - The Art of Unit Testing (mock count > 3); Meszaros - xUnit Test Patterns, Behavior Verification (p.544)",
-        consequence: "the test passes while the real behavior is broken, because only the wiring is asserted",
-        remedy: "assert the observable result of createOrder and replace the collaborator mocks with one fake for the nondeterministic dependency",
-      });
-    }
-  }
-
-  if (e2e.length > 0 && unit.length <= e2e.length) {
-    findings.push({
-      risk: "T6 Architecture Mismatch",
-      severity: "Warning",
-      title: "suite shape is inverted against the 70:20:10 pyramid",
-      symptom: `${unit.length} unit test file(s) vs ${e2e.length} end-to-end file(s)`,
-      source: "Google - How Google Tests Software (70:20:10 unit:integration:E2E)",
-      consequence: "feedback is slow and fragile, so developers stop running the suite locally",
-      remedy: "push the checkout assertions down to unit level and keep E2E for one critical path",
-    });
-  }
-
-  const map = [
-    `Unit tests:        ${unit.length} files, ~${unit.length * 2} tests`,
-    `Integration tests: 0 files, ~0 tests`,
-    `E2E tests:         ${e2e.length} files, ~${e2e.length} tests`,
-  ].join("\n");
-
-  const score = Math.max(0, 100 - findings.filter((f) => f.severity === "Critical").length * 15 - findings.filter((f) => f.severity === "Warning").length * 5 - findings.filter((f) => f.severity === "Suggestion").length);
-
-  const report = [
-    "# Test Quality Review",
-    "",
-    "**Mode:** Test Quality Review",
-    `**Scope:** ${testFiles.length} test files (all test files)`,
-    `**Health Score:** ${score}/100`,
-    "",
-    "```",
-    "Test Suite Map",
-    map,
-    "```",
-    "",
-    "## Findings",
-    "",
-    ...findings.map((f) => [`### ${f.severity === "Critical" ? "🔴 Critical" : f.severity === "Warning" ? "🟡 Warning" : "🟢 Suggestion"}`, "", `**${f.risk} — ${f.title}**`, `Symptom: ${f.symptom}`, `Source: ${f.source}`, `Consequence: ${f.consequence}`, `Remedy: ${f.remedy}`, ""].join("\n")),
-    "## Summary",
-    "",
-    "Mock-heavy interaction tests and unnamed scenarios are the highest-leverage fixes; the suite shape is inverted.",
-  ].join("\n");
-
-  return { report, findings, map };
+/** Every shell command the adapted body tells the reviewer to run, taken from the body. */
+function prescribedCommands(body: string): string[] {
+  return [...new Set([...body.matchAll(/`((?:git|gh|rm|mv|cp|echo|tee|sed)\s[^`]+)`/g)].map((m) => m[1].trim()))];
 }
 
 beforeAll(async () => {
-  project = await mkdtemp(join(tmpdir(), "brooks-acceptance-"));
-  await Bun.write(join(project, "src/order.ts"), "export function createOrder(deps: unknown) {\n  return { id: 1, deps };\n}\n");
-  await Bun.write(join(project, "src/order.test.ts"), DECAYED_UNIT_TEST);
-  await Bun.write(join(project, "e2e/checkout.e2e.test.ts"), E2E_TEST);
+  project = await mkdtemp(join(tmpdir(), "brooks-contract-"));
+  await Bun.write(join(project, "src/order.ts"), "export function createOrder() {\n  return { id: 1 };\n}\n");
+  await Bun.write(join(project, "src/order.test.ts"), 'import { expect, test } from "bun:test";\ntest("test1", () => {\n  expect(1).toBe(1);\n});\n');
   await git(["init", "-q"]);
   await git(["config", "user.email", "test@example.com"]);
-  await git(["config", "user.name", "Acceptance Test"]);
+  await git(["config", "user.name", "Contract Test"]);
   await git(["add", "-A"]);
   await git(["commit", "-qm", "fixture"]);
 });
@@ -170,53 +54,69 @@ afterAll(async () => {
   if (project) await rm(project, { recursive: true, force: true });
 });
 
-describe("adapted Brooks test-quality review: useful output on a disposable project", () => {
-  test("produces Iron-Law findings for every planted decay symptom", async () => {
-    const { findings, report } = await review(project);
-    const risks = findings.map((f) => f.risk);
-    expect(risks).toContain("T1 Test Obscurity");
-    expect(risks).toContain("T4 Mock Abuse");
-    expect(risks).toContain("T6 Architecture Mismatch");
-
-    for (const f of findings) {
-      for (const field of [f.symptom, f.source, f.consequence, f.remedy]) expect(field.length, f.title).toBeGreaterThan(20);
-      expect(f.source).toMatch(/Meszaros|Osherove|Feathers|Google|Hunt/); // a real book citation, not a rule id
+describe("adapted Brooks test-quality review: static content contract", () => {
+  test("every risk carries symptoms, a book citation, a severity guide and a do-not-flag guard", async () => {
+    const body = await Bun.file(`${repoRoot()}${ADAPTED}`).text();
+    for (const risk of RISKS) {
+      const heading = body.indexOf(`### ${risk}`);
+      expect(heading, `${risk} is missing from the adapted body`).toBeGreaterThan(-1);
+      const nextHeading = body.indexOf("\n### ", heading + 1);
+      const section = body.slice(heading, nextHeading === -1 ? body.indexOf("\n## Scan order") : nextHeading);
+      expect(section, `${risk}: no book citation`).toMatch(/Meszaros|Osherove|Feathers|Google|Hunt & Thomas/);
+      expect(section, `${risk}: no severity guide`).toContain("Severity:");
+      expect(section, `${risk}: no "what not to flag" guard`).toContain("Do not flag:");
+      expect(section.length, `${risk}: section is too thin to diagnose with`).toBeGreaterThan(600);
     }
-    expect(report).toContain("**Mode:** Test Quality Review");
-    expect(report).toContain("Test Suite Map");
-    expect(report).toMatch(/\*\*Health Score:\*\* \d+\/100/);
-    expect(report).toContain("Symptom:");
-    expect(report).toContain("Remedy:");
-    expect(report).not.toContain("Trend:"); // no history state is kept
   });
 
-  test("the harness's rules and vocabulary all come from the adapted skill body (no silent drift)", async () => {
-    const skill = await Bun.file(`${repoRoot()}${ADAPTED}`).text();
-    for (const phrase of [
-      "More than 3 mocks in a single unit test",
+  test("the output contract is concrete: report template, Iron Law fields, health score arithmetic", async () => {
+    const body = await Bun.file(`${repoRoot()}${ADAPTED}`).text();
+    for (const required of [
       "Symptom -> Source -> Consequence -> Remedy",
-      "70:20:10",
-      "T1 Test Obscurity",
-      "T4 Mock Abuse",
-      "T6 Architecture Mismatch",
+      "**Mode:** Test Quality Review",
+      "**Health Score:** XX/100",
+      "Test Suite Map",
       "subtract 15 per 🔴, 5 per 🟡, 1 per 🟢",
+      "70:20:10",
+      "More than 3 mocks in a single unit test",
     ]) {
-      expect(skill.includes(phrase), `adapted skill no longer states: ${phrase}`).toBe(true);
+      expect(body.includes(required), `adapted skill no longer states: ${required}`).toBe(true);
+    }
+    expect(body).not.toContain("Trend:"); // no history state is kept between runs
+  });
+});
+
+describe("adapted Brooks test-quality review: prescribed commands are read-only, executed for real", () => {
+  test("the body prescribes shell commands, and all of them are git read commands", async () => {
+    const body = await Bun.file(`${repoRoot()}${ADAPTED}`).text();
+    const commands = prescribedCommands(body);
+    expect(commands.length, "no commands extracted -- the extraction would prove nothing").toBeGreaterThan(0);
+    for (const command of commands) {
+      expect(command, `prescribes a non-git command: ${command}`).toMatch(/^git /);
+      expect(command, `prescribes a mutating git command: ${command}`).toMatch(/^git (diff|log|status|blame|show|rev-parse)\b/);
     }
   });
 
-  test("the reviewed project is byte-identical afterwards: clean git status, no brooks artifacts", async () => {
-    const before = await git(["rev-parse", "HEAD"]);
-    await review(project);
+  test("running every prescribed command leaves a disposable Git project byte-identical", async () => {
+    const body = await Bun.file(`${repoRoot()}${ADAPTED}`).text();
+    const head = (await git(["rev-parse", "HEAD"])).trim();
+
+    for (const command of prescribedCommands(body)) {
+      const proc = Bun.spawn(command.split(/\s+/), { cwd: project, stdout: "pipe", stderr: "pipe" });
+      await proc.exited; // a command may legitimately fail (no `main` ref); it must not mutate
+    }
+
     expect((await git(["status", "--porcelain"])).trim()).toBe("");
-    expect((await git(["rev-parse", "HEAD"])).trim()).toBe(before.trim());
+    expect((await git(["rev-parse", "HEAD"])).trim()).toBe(head);
 
     const stray = new Bun.Glob("**/{.brooks-lint.yaml,.brooks-lint-history.json,*review*.md,*report*.json}");
     const found: string[] = [];
     for await (const f of stray.scan({ cwd: project, onlyFiles: true, dot: true })) found.push(f);
     expect(found).toEqual([]);
   });
+});
 
+describe("adapted Brooks test-quality review: registration and provenance", () => {
   test("the adaptation is registered as an adaptation, and the upstream snapshot was not modified to get there", async () => {
     const catalog = await loadCatalog();
     const entry = catalog.entries.find((e) => e.id === "brooks:brooks-test")!;
@@ -228,5 +128,18 @@ describe("adapted Brooks test-quality review: useful output on a disposable proj
     const brooksRows = catalog.vendored.filter((v) => v.source === "hyhmrright-brooks-lint");
     expect(brooksRows.some((v) => v.path === ADAPTED && v.upstream_path === null)).toBe(true);
     expect(brooksRows.filter((v) => v.path.startsWith("skills/upstream/")).every((v) => v.upstream_path !== null)).toBe(true);
+  });
+
+  test("no doc claims a test executes the review", async () => {
+    const claims: string[] = [];
+    for (const file of ["README.md", "AGENTS.md", "skills/adapted/README.md", "catalog.yaml"]) {
+      const text = await Bun.file(`${repoRoot()}${file}`).text();
+      for (const line of text.split("\n")) {
+        if (/brooks-adaptation\.test\.ts/.test(line) && /\bruns?\b (a|the) .*review|proves a review/.test(line)) {
+          claims.push(`${file}: ${line.trim().slice(0, 120)}`);
+        }
+      }
+    }
+    expect(claims).toEqual([]);
   });
 });

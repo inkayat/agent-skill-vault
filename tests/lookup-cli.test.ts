@@ -14,7 +14,7 @@ async function runLookup(...args: string[]): Promise<{ stdout: string; stderr: s
 }
 
 describe("bin/lookup.ts --id: notes as a stable final field", () => {
-  test("pstack:blast-radius emits the 'skip the arena step' caveat as the last column", async () => {
+  test("pstack:blast-radius emits its adaptation caveat as the last column", async () => {
     const { stdout, exitCode } = await runLookup("--id", "pstack:blast-radius");
     expect(exitCode).toBe(0);
     const lines = stdout.trimEnd().split("\n");
@@ -22,7 +22,7 @@ describe("bin/lookup.ts --id: notes as a stable final field", () => {
     const columns = lines[0].split("\t");
     expect(columns.length).toBe(9);
     expect(columns[0]).toBe("pstack:blast-radius");
-    expect(columns[8]).toContain("skip the arena step");
+    expect(columns[8]).toContain("self-contained adaptation");
   });
 
   test("brooks:brooks-test emits its adaptation caveat as the last column", async () => {

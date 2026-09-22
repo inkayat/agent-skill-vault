@@ -118,6 +118,37 @@ describe("license/notice preservation", () => {
   });
 });
 
+describe("entry notes disclose what is, and is not, vendored", () => {
+  test("every reference-only Brooks row names the project-mutating steps a reader must skip", async () => {
+    const catalog = await loadCatalog();
+    const brooks = catalog.entries.filter((e) => e.source === "hyhmrright-brooks-lint" && e.status === "reference-only");
+    expect(brooks.length).toBeGreaterThan(0);
+    for (const e of brooks) {
+      // Their shared _shared/common.md really does tell the reader to read .brooks-lint.yaml,
+      // append to .brooks-lint-history.json and write suppressions. A note calling these
+      // skills plainly "read-only" would be false; each must name what to skip instead.
+      expect(e.notes, `${e.id}: notes must name the config/history/suppression steps to skip`).toContain(".brooks-lint-history.json");
+      expect(e.notes, `${e.id}: notes must name the config file it would otherwise write`).toContain(".brooks-lint.yaml");
+      expect(e.notes.toLowerCase(), `${e.id}: notes must tell the reader to skip them`).toMatch(/skip/);
+      expect(e.notes, `${e.id}: "read-only report generator" is not true of the upstream body`).not.toContain("read-only report generator");
+    }
+  });
+
+  test("a partially vendored skill is not selectable, and its note discloses exactly what is local", async () => {
+    const catalog = await loadCatalog();
+    const entry = catalog.entries.find((e) => e.id === "discovery:supabase-postgres-best-practices")!;
+    const inventory = catalog.vendored.filter((v) => v.path.includes("supabase-postgres-best-practices/references/"));
+    // The body is an index over a 34-file rule set; only these are vendored.
+    expect(inventory.length).toBeGreaterThan(0);
+    expect(entry.status, "an index over mostly-unvendored rules must not be a worker pick").toBe("reference-only");
+    for (const v of inventory) {
+      const name = v.path.split("/").pop()!;
+      expect(entry.notes, `notes must name the vendored rule file ${name}`).toContain(name);
+    }
+    expect(entry.notes, "notes must disclose how much of the upstream rule set is absent").toMatch(/34/);
+  });
+});
+
 describe("generated artifacts: none remain, and nothing claims they do", () => {
   test("the removed generated files (catalog.compact.tsv, sources.lock) are not reintroduced", async () => {
     for (const path of ["catalog.compact.tsv", "sources.lock"]) {
