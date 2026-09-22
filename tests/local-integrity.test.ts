@@ -1,5 +1,15 @@
 import { describe, expect, test } from "bun:test";
+import { Glob } from "bun";
 import { loadCatalog, repoRoot } from "./helpers.ts";
+
+/**
+ * Everything here reads the ONE authoritative vendored-file inventory (`vendored:` in
+ * catalog.yaml). No hash, path, or commit is repeated in this file: a pin bump edits the
+ * inventory, and these tests follow it.
+ */
+
+/** Repo's own documentation under skills/, deliberately not vendored content. */
+const REPO_OWNED_UNDER_SKILLS = "skills/adapted/README.md";
 
 async function sha256Hex(text: string): Promise<string> {
   const hasher = new Bun.CryptoHasher("sha256");
@@ -21,25 +31,43 @@ async function fetchRawOrSkip(
   }
 }
 
-describe("local vendored content: existence and hash binding (hard-fail, no skip)", () => {
-  test("every firstmate_candidate and reference-only vault_path exists on disk", async () => {
+async function filesUnderSkills(): Promise<string[]> {
+  const glob = new Glob("skills/**/*");
+  const out: string[] = [];
+  for await (const f of glob.scan({ cwd: repoRoot(), onlyFiles: true })) out.push(f);
+  return out.sort();
+}
+
+describe("the vendored inventory covers exactly what is on disk (hard-fail, no skip)", () => {
+  test("every inventory row exists on disk and matches its recorded sha256", async () => {
     const catalog = await loadCatalog();
-    const withLocalContent = catalog.entries.filter((e) => e.status === "firstmate_candidate" || e.status === "reference-only");
-    expect(withLocalContent.length).toBe(69); // 48 firstmate_candidate + 21 reference-only
-    for (const e of withLocalContent) {
-      const exists = await Bun.file(`${repoRoot()}${e.vault_path}`).exists();
-      expect(exists, `${e.id}: missing local file at ${e.vault_path}`).toBe(true);
+    expect(catalog.vendored.length).toBeGreaterThan(0);
+    for (const v of catalog.vendored) {
+      const file = Bun.file(`${repoRoot()}${v.path}`);
+      expect(await file.exists(), `${v.path}: inventory row has no file on disk`).toBe(true);
+      const actual = await sha256Hex(await file.text());
+      expect(actual, `${v.path}: sha256 mismatch (file edited without updating catalog.yaml, or vice versa)`).toBe(v.sha256);
     }
   });
 
-  test("every firstmate_candidate and reference-only content_sha256 matches the actual vendored file (catches drift/corruption)", async () => {
+  test("no file under skills/ is missing from the inventory (no unmaintained bytes)", async () => {
     const catalog = await loadCatalog();
-    const withLocalContent = catalog.entries.filter((e) => e.status === "firstmate_candidate" || e.status === "reference-only");
-    for (const e of withLocalContent) {
-      const body = await Bun.file(`${repoRoot()}${e.vault_path}`).text();
-      const actual = await sha256Hex(body);
-      expect(actual, `${e.id}: content_sha256 mismatch (file was edited without updating catalog.yaml, or vice versa)`).toBe(e.content_sha256);
-    }
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
+    const orphans = (await filesUnderSkills()).filter((f) => f !== REPO_OWNED_UNDER_SKILLS && !inventory.has(f));
+    expect(orphans).toEqual([]);
+  });
+
+  test("the inventory covers skills, prompts, references, helper/guide files and licenses -- not just entry bodies", async () => {
+    const catalog = await loadCatalog();
+    const entryPaths = new Set(catalog.entries.map((e) => e.vault_path).filter(Boolean) as string[]);
+    const supportRows = catalog.vendored.filter((v) => !entryPaths.has(v.path));
+    // Guides, _shared framework files, reference checklists, scripts, examples and licenses
+    // are maintained bytes with no catalog row of their own; they must still be inventoried.
+    expect(supportRows.length).toBeGreaterThan(0);
+    expect(supportRows.some((v) => /\/LICENSE(\.txt)?$/.test(v.path))).toBe(true);
+    expect(supportRows.some((v) => v.path.includes("/references/"))).toBe(true);
+    expect(supportRows.some((v) => v.path.includes("/_shared/"))).toBe(true);
+    expect(supportRows.some((v) => v.path.includes("/scripts/"))).toBe(true);
   });
 
   test("acceptance-critical ids resolve to a real local file: mattpocock:grilling and brooks:brooks-test", async () => {
@@ -69,58 +97,92 @@ describe("local vendored content: existence and hash binding (hard-fail, no skip
 });
 
 describe("license/notice preservation", () => {
-  test("every source with at least one vendored (skills/upstream/) entry has a local LICENSE file", async () => {
+  test("every source with vendored bytes has its own LICENSE inventoried alongside them", async () => {
     const catalog = await loadCatalog();
-    const vendoredSourceIds = new Set(
-      catalog.entries.filter((e) => e.vault_path?.startsWith("skills/upstream/")).map((e) => e.source),
-    );
+    const vendoredSourceIds = new Set(catalog.vendored.filter((v) => v.path.startsWith("skills/upstream/")).map((v) => v.source));
     expect(vendoredSourceIds.size).toBeGreaterThan(0);
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
     for (const sid of vendoredSourceIds) {
-      const licenseMd = Bun.file(`${repoRoot()}skills/upstream/${sid}/LICENSE`);
-      const licenseTxt = Bun.file(`${repoRoot()}skills/upstream/${sid}/LICENSE.txt`);
-      const hasLicense = (await licenseMd.exists()) || (await licenseTxt.exists());
-      expect(hasLicense, `source ${sid}: no LICENSE/LICENSE.txt vendored under skills/upstream/${sid}/`).toBe(true);
+      const hasLicense = [...inventory].some((p) => p.startsWith(`skills/upstream/${sid}/`) && /\/LICENSE(\.txt)?$/.test(p));
+      expect(hasLicense, `source ${sid}: no LICENSE/LICENSE.txt inventoried under skills/upstream/${sid}/`).toBe(true);
     }
+  });
+
+  test("an adaptation's source keeps its upstream license vendored too", async () => {
+    const catalog = await loadCatalog();
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
+    for (const v of catalog.vendored.filter((x) => x.path.startsWith("skills/adapted/"))) {
+      const hasLicense = [...inventory].some((p) => p.startsWith(`skills/upstream/${v.source}/`) && /\/LICENSE(\.txt)?$/.test(p));
+      expect(hasLicense, `${v.path}: derived from ${v.source} but that source's LICENSE is not vendored`).toBe(true);
+    }
+  });
+});
+
+describe("generated artifacts: none remain, and nothing claims they do", () => {
+  test("the removed generated files (catalog.compact.tsv, sources.lock) are not reintroduced", async () => {
+    for (const path of ["catalog.compact.tsv", "sources.lock"]) {
+      expect(await Bun.file(`${repoRoot()}${path}`).exists(), `${path} came back; catalog.yaml is the only authority`).toBe(false);
+    }
+  });
+
+  test("no tool or doc still treats a generator or its output as live", async () => {
+    const glob = new Glob("**/*.{md,ts,yaml}");
+    const scanned: string[] = [];
+    const offenders: string[] = [];
+    for await (const file of glob.scan({ cwd: repoRoot(), onlyFiles: true })) {
+      if (file.startsWith("skills/") || file.startsWith("node_modules/")) continue; // vendored text, not ours
+      if (file === "tests/local-integrity.test.ts") continue; // names them on purpose, in the test above
+      scanned.push(file);
+      const text = await Bun.file(`${repoRoot()}${file}`).text();
+      // The generator is gone: nothing may reference it at all. The two artifact names may
+      // still appear in README.md, which records that they were removed and why.
+      if (text.includes("bin/render.ts")) offenders.push(`${file}: references the deleted generator`);
+      if (file !== "README.md" && /catalog\.compact\.tsv|sources\.lock/.test(text)) {
+        offenders.push(`${file}: still treats a generated artifact as live`);
+      }
+    }
+    expect(scanned).toContain("README.md"); // the scan really reaches the docs
+    expect(scanned).toContain("catalog.yaml");
+    expect(offenders).toEqual([]);
   });
 });
 
 describe("pin integrity vs. live upstream (network-optional; a reachable 404 is a failure, not a skip)", () => {
   test(
-    "every skills/upstream/ vendored file is byte-identical to the live commit it claims to be pinned at",
+    "every skills/upstream/ inventory row is byte-identical to the live commit it claims to be pinned at",
     async () => {
       const catalog = await loadCatalog();
-      const upstreamEntries = catalog.entries.filter((e) => e.vault_path?.startsWith("skills/upstream/"));
-      expect(upstreamEntries.length).toBeGreaterThan(0);
+      const rows = catalog.vendored.filter((v) => v.path.startsWith("skills/upstream/"));
+      expect(rows.length).toBeGreaterThan(0);
 
       const results = await Promise.all(
-        upstreamEntries.map(async (e) => {
-          const source = catalog.sources[e.source];
-          const result = await fetchRawOrSkip(source.repo, source.sha, e.upstream_path!);
-          return { e, result };
+        rows.map(async (v) => {
+          const source = catalog.sources[v.source];
+          const result = await fetchRawOrSkip(source.repo, source.sha, v.upstream_path!);
+          return { v, result };
         }),
       );
 
       let verified = 0;
       let unreachable = 0;
-      for (const { e, result } of results) {
+      for (const { v, result } of results) {
         if (!result.reachable) {
           unreachable++;
           continue;
         }
         // We got a response: a non-200 here means the pin is stale/broken, a real failure.
-        expect(result.res.ok, `${e.id}: pinned commit no longer serves ${e.upstream_path} (HTTP ${result.res.status}) -- pin is stale or the path moved`).toBe(true);
-        const liveBody = await result.res.text();
-        const liveHash = await sha256Hex(liveBody);
-        expect(liveHash, `${e.id}: locally vendored content no longer matches the live pinned commit`).toBe(e.content_sha256);
+        expect(result.res.ok, `${v.path}: pinned commit no longer serves ${v.upstream_path} (HTTP ${result.res.status}) -- pin is stale or the path moved`).toBe(true);
+        const liveHash = await sha256Hex(await result.res.text());
+        expect(liveHash, `${v.path}: locally vendored content no longer matches the live pinned commit`).toBe(v.sha256);
         verified++;
       }
 
-      if (unreachable === upstreamEntries.length) {
-        console.warn(`pin integrity check: network unreachable for all ${unreachable} entries -- skipped, not failed.`);
+      if (unreachable === rows.length) {
+        console.warn(`pin integrity check: network unreachable for all ${unreachable} rows -- skipped, not failed.`);
       } else {
-        console.log(`pin integrity check: verified ${verified}/${upstreamEntries.length} vendored files byte-identical to their live pinned commit (${unreachable} unreachable).`);
+        console.log(`pin integrity check: verified ${verified}/${rows.length} vendored files byte-identical to their live pinned commit (${unreachable} unreachable).`);
       }
     },
-    30000,
+    60000,
   );
 });

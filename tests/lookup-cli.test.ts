@@ -25,12 +25,13 @@ describe("bin/lookup.ts --id: notes as a stable final field", () => {
     expect(columns[8]).toContain("skip the arena step");
   });
 
-  test("pstack:how emits the OMP-task/Pi-single-pass caveat as the last column", async () => {
-    const { stdout, exitCode } = await runLookup("--id", "pstack:how");
+  test("brooks:brooks-test emits its adaptation caveat as the last column", async () => {
+    const { stdout, exitCode } = await runLookup("--id", "brooks:brooks-test");
     expect(exitCode).toBe(0);
     const columns = stdout.trimEnd().split("\t");
     expect(columns.length).toBe(9);
-    expect(columns[8]).toContain("run explorers as OMP task helpers; single pass on Pi");
+    expect(columns[6]).toBe("skills/adapted/brooks/brooks-test/SKILL.md");
+    expect(columns[8]).toContain("FirstMate-safe adaptation");
   });
 
   test("unsafe/non-resolvable ids still refuse (exit 1, stderr explains, no stdout row)", async () => {

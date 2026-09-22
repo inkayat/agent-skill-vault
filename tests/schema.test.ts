@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { validateCatalog, type Catalog, type Entry, type Source } from "../bin/lib/catalog.ts";
+import { validateCatalog, type Catalog, type Entry, type Source, type VendoredFile } from "../bin/lib/catalog.ts";
 import { loadCatalog } from "./helpers.ts";
 
 function baseSource(overrides: Partial<Source> = {}): Source {
@@ -26,25 +26,37 @@ function baseEntry(overrides: Partial<Entry> = {}): Entry {
     scope: "worker",
     categories: [],
     cluster: "implement",
-    favorite: false,
     notes: "",
     ...overrides,
   };
 }
 
-/** A minimal, schema-valid firstmate_candidate entry (has vault_path + content_sha256). */
+/** A minimal, schema-valid firstmate_candidate entry (vault_path backed by an inventory row). */
 function candidateEntry(overrides: Partial<Entry> = {}): Entry {
   return baseEntry({
     status: "firstmate_candidate",
     activation: "explicit",
     vault_path: "skills/upstream/test-source/skills/test/SKILL.md",
-    content_sha256: "b".repeat(64),
     ...overrides,
   });
 }
 
-function baseCatalog(entries: Entry[], sources: Record<string, Source> = { "test-source": baseSource() }): Catalog {
-  return { version: 1, sources, entries };
+function vendoredRow(overrides: Partial<VendoredFile> = {}): VendoredFile {
+  return {
+    path: "skills/upstream/test-source/skills/test/SKILL.md",
+    source: "test-source",
+    upstream_path: "skills/test/SKILL.md",
+    sha256: "b".repeat(64),
+    ...overrides,
+  };
+}
+
+function baseCatalog(
+  entries: Entry[],
+  sources: Record<string, Source> = { "test-source": baseSource() },
+  vendored: VendoredFile[] = [vendoredRow(), vendoredRow({ path: "skills/upstream/test-source/x.md", upstream_path: "x.md" })],
+): Catalog {
+  return { version: 1, sources, entries, vendored };
 }
 
 describe("catalog.yaml (real)", () => {
@@ -92,7 +104,7 @@ describe("validateCatalog: enumeration and invariants", () => {
 
   test("accepts firstmate_candidate with auto-candidate or explicit", () => {
     for (const activation of ["auto-candidate", "explicit"] as const) {
-      const ok = baseCatalog([candidateEntry({ activation, size_bytes: activation === "auto-candidate" ? 100 : undefined })]);
+      const ok = baseCatalog([candidateEntry({ activation })]);
       expect(validateCatalog(ok)).toEqual([]);
     }
   });
@@ -134,7 +146,7 @@ describe("validateCatalog: notes field", () => {
   });
 });
 
-describe("validateCatalog: content-model invariants (vault_path / content_sha256)", () => {
+describe("validateCatalog: content-model invariants (vault_path bound to the vendored inventory)", () => {
   test("rejects a firstmate_candidate with no vault_path", () => {
     const bad = baseCatalog([candidateEntry({ vault_path: null })]);
     expect(validateCatalog(bad).some((e) => e.includes("requires a real local vault_path"))).toBe(true);
@@ -142,22 +154,35 @@ describe("validateCatalog: content-model invariants (vault_path / content_sha256
 
   test("rejects a firstmate_candidate whose vault_path escapes skills/upstream or skills/adapted", () => {
     const bad = baseCatalog([candidateEntry({ vault_path: "somewhere/else/SKILL.md" })]);
-    expect(validateCatalog(bad).some((e) => e.includes("must live under skills/upstream/ or skills/adapted/"))).toBe(true);
+    expect(validateCatalog(bad).some((e) => e.includes("must stay under skills/upstream/ or skills/adapted/"))).toBe(true);
   });
 
-  test("accepts a firstmate_candidate vault_path under skills/adapted/", () => {
-    const ok = baseCatalog([candidateEntry({ vault_path: "skills/adapted/x/SKILL.md" })]);
+  test("rejects a vault_path that traverses out of the repo with ..", () => {
+    const bad = baseCatalog([candidateEntry({ vault_path: "skills/upstream/../../etc/passwd" })]);
+    expect(validateCatalog(bad).some((e) => e.includes("no traversal"))).toBe(true);
+  });
+
+  test("accepts a firstmate_candidate vault_path under skills/adapted/ when the inventory carries it", () => {
+    const ok = baseCatalog(
+      [candidateEntry({ vault_path: "skills/adapted/x/SKILL.md" })],
+      { "test-source": baseSource() },
+      [vendoredRow({ path: "skills/adapted/x/SKILL.md", upstream_path: null })],
+    );
     expect(validateCatalog(ok)).toEqual([]);
   });
 
-  test("rejects a firstmate_candidate with no content_sha256", () => {
-    const bad = baseCatalog([candidateEntry({ content_sha256: undefined })]);
-    expect(validateCatalog(bad).some((e) => e.includes("requires content_sha256"))).toBe(true);
+  test("rejects a vault_path with no row in the vendored inventory (the file would be unmaintained)", () => {
+    const bad = baseCatalog([candidateEntry({ vault_path: "skills/upstream/test-source/skills/other/SKILL.md" })]);
+    expect(validateCatalog(bad).some((e) => e.includes("has no row in the vendored inventory"))).toBe(true);
   });
 
-  test("rejects a malformed content_sha256", () => {
-    const bad = baseCatalog([candidateEntry({ content_sha256: "not-a-hash" })]);
-    expect(validateCatalog(bad).some((e) => e.includes("not 64 hex chars"))).toBe(true);
+  test("rejects a vault_path that does not mirror its own source and upstream_path", () => {
+    const bad = baseCatalog(
+      [candidateEntry({ vault_path: "skills/upstream/test-source/x.md" })],
+      { "test-source": baseSource() },
+      [vendoredRow({ path: "skills/upstream/test-source/x.md", upstream_path: "x.md" })],
+    );
+    expect(validateCatalog(bad).some((e) => e.includes("must mirror its own source+upstream_path"))).toBe(true);
   });
 
   test("rejects a catalog/team-only/restricted entry that carries a vault_path", () => {
@@ -172,34 +197,72 @@ describe("validateCatalog: content-model invariants (vault_path / content_sha256
     expect(validateCatalog(bad).some((e) => e.includes("requires a real local vault_path"))).toBe(true);
   });
 
-  test("accepts a reference-only entry with a real vault_path + content_sha256", () => {
+  test("accepts a reference-only entry whose vault_path is an inventory row", () => {
     const ok = baseCatalog([
-      baseEntry({ status: "reference-only", activation: "never", vault_path: "skills/upstream/test-source/x.md", content_sha256: "c".repeat(64) }),
+      baseEntry({ status: "reference-only", activation: "never", upstream_path: "x.md", vault_path: "skills/upstream/test-source/x.md" }),
     ]);
     expect(validateCatalog(ok)).toEqual([]);
   });
 });
 
-describe("real catalog: every firstmate_candidate and reference-only entry has a real vault_path and content_sha256", () => {
-  test("all 48 firstmate_candidate entries resolve to skills/upstream/ or skills/adapted/", async () => {
-    const catalog = await loadCatalog();
-    const candidates = catalog.entries.filter((e) => e.status === "firstmate_candidate");
-    expect(candidates.length).toBe(48);
-    for (const e of candidates) {
-      expect(e.vault_path, e.id).toBeTruthy();
-      expect(e.vault_path!.startsWith("skills/upstream/") || e.vault_path!.startsWith("skills/adapted/"), e.id).toBe(true);
-      expect(e.content_sha256, e.id).toMatch(/^[0-9a-f]{64}$/);
+describe("validateCatalog: the vendored inventory itself", () => {
+  test("rejects a missing inventory", () => {
+    const bad = { version: 1, sources: { "test-source": baseSource() }, entries: [] } as unknown as Catalog;
+    expect(validateCatalog(bad).some((e) => e.includes("missing authoritative vendored-file inventory"))).toBe(true);
+  });
+
+  test("rejects a duplicate inventory row (two hashes could disagree for one file)", () => {
+    const bad = baseCatalog([], { "test-source": baseSource() }, [vendoredRow(), vendoredRow({ sha256: "c".repeat(64) })]);
+    expect(validateCatalog(bad).some((e) => e.includes("duplicate inventory row"))).toBe(true);
+  });
+
+  test("rejects an inventory path outside skills/, or one that traverses out of the repo", () => {
+    for (const path of ["/etc/passwd", "../outside.md", "skills/upstream/test-source/../../../outside.md"]) {
+      const bad = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ path })]);
+      expect(validateCatalog(bad).some((e) => e.includes("path must stay under")), path).toBe(true);
     }
   });
 
-  test("all 21 reference-only entries also resolve to a real vault_path (explicit-id/captain reference only)", async () => {
+  test("rejects an upstream row whose path does not equal skills/upstream/<source>/<upstream_path>", () => {
+    const bad = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ upstream_path: "skills/elsewhere/SKILL.md" })]);
+    expect(validateCatalog(bad).some((e) => e.includes("path must equal"))).toBe(true);
+  });
+
+  test("rejects an upstream row with no upstream_path, and an adapted row that claims one", () => {
+    const noPath = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ upstream_path: null })]);
+    expect(validateCatalog(noPath).some((e) => e.includes("requires upstream_path"))).toBe(true);
+    const adapted = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ path: "skills/adapted/x/SKILL.md", upstream_path: "skills/test/SKILL.md" })]);
+    expect(validateCatalog(adapted).some((e) => e.includes("must set upstream_path: null"))).toBe(true);
+  });
+
+  test("rejects an inventory row pointing at an unknown source, or carrying a malformed hash", () => {
+    const unknown = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ path: "skills/upstream/ghost/x.md", source: "ghost", upstream_path: "x.md" })]);
+    expect(validateCatalog(unknown).some((e) => e.includes("unknown source ghost"))).toBe(true);
+    const badHash = baseCatalog([], { "test-source": baseSource() }, [vendoredRow({ sha256: "nope" })]);
+    expect(validateCatalog(badHash).some((e) => e.includes("sha256 is not 64 hex chars"))).toBe(true);
+  });
+});
+
+describe("real catalog: every firstmate_candidate and reference-only entry resolves to an inventoried file", () => {
+  test("every firstmate_candidate entry resolves to skills/upstream/ or skills/adapted/", async () => {
     const catalog = await loadCatalog();
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
+    const candidates = catalog.entries.filter((e) => e.status === "firstmate_candidate");
+    expect(candidates.length).toBeGreaterThan(0);
+    for (const e of candidates) {
+      expect(e.vault_path, e.id).toBeTruthy();
+      expect(inventory.has(e.vault_path!), `${e.id}: ${e.vault_path} is not in the vendored inventory`).toBe(true);
+    }
+  });
+
+  test("every reference-only entry also resolves to a real vault_path (explicit-id/captain reference only)", async () => {
+    const catalog = await loadCatalog();
+    const inventory = new Set(catalog.vendored.map((v) => v.path));
     const refOnly = catalog.entries.filter((e) => e.status === "reference-only");
-    expect(refOnly.length).toBe(21);
+    expect(refOnly.length).toBeGreaterThan(0);
     for (const e of refOnly) {
       expect(e.vault_path, e.id).toBeTruthy();
-      expect(e.vault_path!.startsWith("skills/upstream/") || e.vault_path!.startsWith("skills/adapted/"), e.id).toBe(true);
-      expect(e.content_sha256, e.id).toMatch(/^[0-9a-f]{64}$/);
+      expect(inventory.has(e.vault_path!), `${e.id}: ${e.vault_path} is not in the vendored inventory`).toBe(true);
     }
   });
 

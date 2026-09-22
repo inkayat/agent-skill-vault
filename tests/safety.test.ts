@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ALLOWED_LOOKUP_STATUSES, compactRows, lookupById } from "../bin/lib/catalog.ts";
+import { ALLOWED_LOOKUP_STATUSES, lookupSurface, lookupById } from "../bin/lib/catalog.ts";
 import { loadCatalog } from "./helpers.ts";
 
 const STATUSES = ["installed", "firstmate_candidate", "reference-only", "catalog", "team-only", "restricted"] as const;
@@ -30,9 +30,9 @@ describe("safe status/activation combinations", () => {
     }
   });
 
-  test("the lookup surface (compactRows) contains only installed/firstmate_candidate/reference-only, exactly ALLOWED_LOOKUP_STATUSES", async () => {
+  test("the lookup surface (lookupSurface) contains only installed/firstmate_candidate/reference-only, exactly ALLOWED_LOOKUP_STATUSES", async () => {
     const catalog = await loadCatalog();
-    const rows = compactRows(catalog);
+    const rows = lookupSurface(catalog);
     expect(rows.length).toBeGreaterThan(0);
     for (const e of rows) {
       expect(e.status in ALLOWED_LOOKUP_STATUSES, e.id).toBe(true);
@@ -49,11 +49,11 @@ describe("safe status/activation combinations", () => {
     }
   });
 
-  test("team-only rows never appear in compactRows, matching restricted and catalog", async () => {
+  test("team-only rows never appear in lookupSurface, matching restricted and catalog", async () => {
     const catalog = await loadCatalog();
     const teamOnly = catalog.entries.filter((e) => e.status === "team-only");
     expect(teamOnly.length).toBe(6);
-    const compactIds = new Set(compactRows(catalog).map((e) => e.id));
+    const compactIds = new Set(lookupSurface(catalog).map((e) => e.id));
     for (const e of teamOnly) {
       expect(compactIds.has(e.id), e.id).toBe(false);
     }

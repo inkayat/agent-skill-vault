@@ -41,13 +41,21 @@ describe("explicit-id lookup", () => {
 
   test("returns the exact row for a reference-only id, with a real cache_path (not empty, not null)", async () => {
     const catalog = await loadCatalog();
-    for (const id of ["mattpocock:grilling", "brooks:brooks-test"]) {
+    for (const id of ["mattpocock:grilling", "superpowers:requesting-code-review"]) {
       const entry = lookupById(catalog, id);
       expect(entry?.status, id).toBe("reference-only");
       const path = cachePath(entry!);
       expect(path, id).toBeTruthy();
       expect(path, id).toMatch(/^skills\/upstream\//);
     }
+  });
+
+  test("returns the adapted body for brooks:brooks-test, the explicit test-quality specialist", async () => {
+    const catalog = await loadCatalog();
+    const entry = lookupById(catalog, "brooks:brooks-test");
+    expect(entry?.status).toBe("firstmate_candidate");
+    expect(entry?.activation).toBe("explicit");
+    expect(cachePath(entry!)).toBe("skills/adapted/brooks/brooks-test/SKILL.md");
   });
 });
 
@@ -79,14 +87,18 @@ describe("category shortlist behavior", () => {
       entries: [
         {
           id: "ref:decoy", source: "s", upstream_path: "x.md", vault_path: "skills/upstream/s/x.md",
-          content_sha256: "b".repeat(64), status: "reference-only", activation: "never", scope: "worker",
-          categories: ["REVIEW"], cluster: "review", favorite: false, notes: "decoy",
+          status: "reference-only", activation: "never", scope: "worker",
+          categories: ["REVIEW"], cluster: "review", notes: "decoy",
         },
         {
           id: "cand:real", source: "s", upstream_path: "y.md", vault_path: "skills/upstream/s/y.md",
-          content_sha256: "c".repeat(64), status: "firstmate_candidate", activation: "auto-candidate", scope: "worker",
-          categories: ["REVIEW"], cluster: "review", favorite: false, notes: "real", size_bytes: 100,
+          status: "firstmate_candidate", activation: "auto-candidate", scope: "worker",
+          categories: ["REVIEW"], cluster: "review", notes: "real",
         },
+      ],
+      vendored: [
+        { path: "skills/upstream/s/x.md", source: "s", upstream_path: "x.md", sha256: "b".repeat(64) },
+        { path: "skills/upstream/s/y.md", source: "s", upstream_path: "y.md", sha256: "c".repeat(64) },
       ],
     };
     const rows = lookupByCategory(synthetic, "REVIEW");
@@ -147,13 +159,11 @@ describe("renderIdRow (--id notes column)", () => {
       source: "test-source",
       upstream_path: "skills/test/SKILL.md",
       vault_path: "skills/upstream/test-source/skills/test/SKILL.md",
-      content_sha256: "b".repeat(64),
       status: "firstmate_candidate",
       activation: "explicit",
       scope: "worker",
       categories: ["IMPLEMENT"],
       cluster: "implement",
-      favorite: false,
       notes: "",
       ...overrides,
     };
@@ -167,12 +177,12 @@ describe("renderIdRow (--id notes column)", () => {
     expect(columns[8]).toContain("skip the arena step");
   });
 
-  test("pstack:how exposes the OMP-task/Pi-single-pass caveat as the final field", async () => {
+  test("brooks:brooks-test exposes its adaptation caveat as the final field", async () => {
     const catalog = await loadCatalog();
-    const entry = lookupById(catalog, "pstack:how")!;
+    const entry = lookupById(catalog, "brooks:brooks-test")!;
     const columns = renderIdRow(entry).split("\t");
     expect(columns.length).toBe(9);
-    expect(columns[8]).toContain("run explorers as OMP task helpers; single pass on Pi");
+    expect(columns[8]).toContain("FirstMate-safe adaptation");
   });
 
   test("the first 8 columns are byte-identical to the base row (no shift, no duplication)", async () => {
